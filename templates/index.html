@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FindXpert — Expert Accounting in Your Pocket</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#08111f; --surface:#0f1d30; --s2:#162540; --s3:#1d2f4d;
+  --border:rgba(255,255,255,0.06); --border2:rgba(255,255,255,0.12);
+  --accent:#00c896; --adim:rgba(0,200,150,0.10);
+  --blue:#3b82f6;  --bdim:rgba(59,130,246,0.10);
+  --amber:#f59e0b; --ydim:rgba(245,158,11,0.10);
+  --red:#ef4444;   --rdim:rgba(239,68,68,0.10);
+  --green:#10b981; --gdim:rgba(16,185,129,0.10);
+  --text:#e8f0fe;  --muted:#64748b; --slate:#94a3b8;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
+
+/* LEGAL WALL */
+#lwall{position:fixed;inset:0;background:rgba(8,17,31,.97);backdrop-filter:blur(8px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;}
+.lmodal{background:var(--surface);border:1px solid rgba(245,158,11,.3);border-radius:20px;max-width:560px;width:100%;overflow:hidden;}
+.lhdr{background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(239,68,68,.08));border-bottom:1px solid rgba(245,158,11,.2);padding:28px 32px 22px;text-align:center;}
+.lhdr-icon{font-size:38px;margin-bottom:10px;}
+.lhdr-title{font-family:'Syne',sans-serif;font-size:19px;font-weight:800;color:var(--amber);margin-bottom:4px;}
+.lhdr-sub{font-size:12px;color:var(--slate);}
+.lbody{padding:24px 28px;}
+.lsec{margin-bottom:14px;padding:14px;background:var(--s2);border-radius:10px;border-left:3px solid var(--amber);}
+.lsec-t{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--amber);font-weight:700;margin-bottom:6px;}
+.lsec-p{font-size:11.5px;color:var(--slate);line-height:1.65;}
+.lsec-p strong{color:var(--text);}
+.lchecks{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
+.lcheck{display:flex;align-items:flex-start;gap:10px;cursor:pointer;}
+.lcheck input{width:17px;height:17px;flex-shrink:0;margin-top:2px;accent-color:var(--accent);cursor:pointer;}
+.lcheck-t{font-size:11.5px;color:var(--slate);line-height:1.5;}
+.lcheck-t strong{color:var(--text);}
+.lbtn{width:100%;padding:13px;border-radius:10px;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:default;background:var(--s3);color:var(--muted);transition:all .2s;}
+.lbtn.on{background:var(--accent);color:#000;cursor:pointer;}
+.lbtn.on:hover{background:#00b085;transform:translateY(-1px);}
+
+/* APP SHELL */
+#app{display:none;}
+.shell{display:grid;grid-template-columns:228px 1fr;min-height:100vh;}
+
+/* SIDEBAR */
+.sb{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.sb-logo{padding:20px 20px 16px;border-bottom:1px solid var(--border);}
+.sb-logo-mark{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;}
+.sb-logo-mark em{background:linear-gradient(135deg,#00c896,#00a878);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-style:normal;}
+.sb-logo-tag{font-size:10px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:1.2px;}
+.sb-nav{padding:14px 10px;flex:1;display:flex;flex-direction:column;gap:2px;}
+.sb-grp{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:700;padding:10px 10px 4px;}
+.sb-btn{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--slate);transition:all .15s;border:none;background:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif;}
+.sb-btn:hover{background:var(--s2);color:var(--text);}
+.sb-btn.active{background:var(--adim);color:var(--accent);font-weight:600;}
+.sb-ico{font-size:15px;width:20px;text-align:center;flex-shrink:0;}
+.sb-badge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;}
+.sb-user{padding:12px 10px;border-top:1px solid var(--border);}
+.sb-user-inner{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s2);border-radius:10px;}
+.sb-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--blue));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#08111f;flex-shrink:0;}
+.sb-uname{font-size:12px;font-weight:600;}
+.sb-uplan{font-size:10px;color:var(--accent);}
+
+/* MAIN */
+.main{display:flex;flex-direction:column;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 26px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+.topbar-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;}
+.topbar-r{display:flex;align-items:center;gap:8px;}
+.lbar{background:rgba(245,158,11,.07);border-bottom:1px solid rgba(245,158,11,.15);padding:8px 26px;font-size:11px;color:var(--slate);display:flex;align-items:center;gap:8px;}
+.lbar strong{color:var(--amber);}
+
+/* PANELS */
+.panel{display:none;padding:24px 26px;flex:1;}
+.panel.active{display:block;}
+
+/* BUTTONS */
+.btn{padding:7px 14px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .15s;}
+.btn-accent{background:var(--accent);color:#000;}
+.btn-accent:hover{background:#00b085;}
+.btn-ghost{background:var(--s2);color:var(--text);border:1px solid var(--border2);}
+.btn-ghost:hover{background:var(--s3);}
+.btn-blue{background:var(--blue);color:#fff;}
+.btn-sm{padding:5px 10px;font-size:11px;}
+
+/* CHIPS */
+.chip{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;}
+.chip-amber{background:var(--ydim);color:var(--amber);border:1px solid rgba(245,158,11,.25);}
+.chip-blue{background:var(--bdim);color:var(--blue);border:1px solid rgba(59,130,246,.25);}
+.chip-green{background:var(--gdim);color:var(--green);border:1px solid rgba(16,185,129,.25);}
+
+/* STATS */
+.stats{display:grid;gap:14px;margin-bottom:22px;}
+.stats-4{grid-template-columns:repeat(4,1fr);}
+.stats-3{grid-template-columns:repeat(3,1fr);}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:18px;transition:border-color .2s;}
+.stat:hover{border-color:var(--border2);}
+.stat.hl-g{border-color:rgba(0,229,180,.25);background:var(--adim);}
+.stat.hl-y{border-color:rgba(245,158,11,.25);background:var(--ydim);}
+.stat.hl-r{border-color:rgba(239,68,68,.25);background:var(--rdim);}
+.stat.hl-b{border-color:rgba(59,130,246,.25);background:var(--bdim);}
+.stat-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.stat-lbl{font-size:10px;color:var(--slate);text-transform:uppercase;letter-spacing:.8px;font-weight:600;}
+.stat-ico{font-size:17px;}
+.stat-val{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;letter-spacing:-1px;line-height:1;margin-bottom:5px;}
+.stat-sub{font-size:11px;color:var(--slate);}
+.cg{color:var(--accent);} .cy{color:var(--amber);} .cr{color:var(--red);} .cb{color:var(--blue);} .cm{color:var(--muted);}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:13px;overflow:hidden;margin-bottom:16px;}
+.card-h{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+.card-act{font-size:11px;color:var(--accent);cursor:pointer;font-weight:600;}
+.card-b{padding:18px 20px;}
+
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 340px;gap:16px;}
+.g2e{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.col{display:flex;flex-direction:column;gap:16px;}
+
+/* ALERT */
+.alert{display:flex;align-items:center;gap:12px;padding:13px 16px;border-radius:11px;margin-bottom:20px;}
+.al-y{background:var(--ydim);border:1px solid rgba(245,158,11,.25);}
+.al-b{background:var(--bdim);border:1px solid rgba(59,130,246,.25);}
+.al-g{background:var(--gdim);border:1px solid rgba(16,185,129,.25);}
+.al-r{background:var(--rdim);border:1px solid rgba(239,68,68,.25);}
+.alert-ico{font-size:18px;flex-shrink:0;}
+.alert-body{flex:1;}
+.alert-t{font-size:12px;font-weight:700;}
+.alert-d{font-size:11px;color:var(--slate);margin-top:2px;}
+
+/* CHART */
+.chart{height:150px;display:flex;align-items:flex-end;gap:6px;padding-bottom:4px;}
+.bg{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;}
+.bp{display:flex;gap:2px;align-items:flex-end;}
+.bar{border-radius:4px 4px 0 0;width:12px;cursor:pointer;transition:opacity .2s;}
+.bar:hover{opacity:.7;}
+.bar.inc{background:var(--accent);}
+.bar.exp{background:rgba(239,68,68,.55);}
+.bar.pi{background:transparent;border:2px dashed var(--accent);border-bottom:none;}
+.bar.pe{background:transparent;border:2px dashed rgba(239,68,68,.55);border-bottom:none;}
+.blbl{font-size:10px;color:var(--slate);}
+.legend{display:flex;gap:16px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
+.leg{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--slate);}
+.ldot{width:9px;height:9px;border-radius:3px;}
+
+/* TRANSACTIONS */
+.txlist{display:flex;flex-direction:column;gap:2px;padding:8px 12px;}
+.tx{display:flex;align-items:center;gap:11px;padding:10px 10px;border-radius:9px;cursor:pointer;transition:background .15s;}
+.tx:hover{background:var(--s2);}
+.tx-ico{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.tx-body{flex:1;min-width:0;}
+.tx-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tx-meta{font-size:10px;color:var(--slate);margin-top:1px;}
+.tx-r{text-align:right;flex-shrink:0;}
+.tx-amt{font-size:13px;font-weight:700;font-family:'Syne',sans-serif;}
+.tag{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;margin-top:2px;}
+.tg{background:var(--gdim);color:var(--green);}
+.ty{background:var(--ydim);color:var(--amber);}
+.tr{background:var(--rdim);color:var(--red);}
+.ta{background:var(--adim);color:var(--accent);}
+
+/* TAX CALC INTERACTIVE */
+.calc-wrap{padding:20px;}
+.calc-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.calc-label{font-size:12px;color:var(--slate);}
+.calc-input{background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--text);font-family:'DM Mono',monospace;width:120px;text-align:right;}
+.calc-input:focus{outline:none;border-color:var(--accent);}
+.calc-select{background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:6px 10px;font-size:12px;color:var(--text);font-family:'DM Sans',sans-serif;cursor:pointer;}
+.calc-select:focus{outline:none;border-color:var(--accent);}
+.calc-divider{height:1px;background:var(--border);margin:14px 0;}
+.calc-result-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.calc-result-label{font-size:12px;color:var(--slate);display:flex;align-items:center;gap:7px;}
+.calc-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.calc-result-val{font-size:13px;font-weight:700;font-family:'Syne',sans-serif;}
+.calc-total-box{background:var(--ydim);border:1px solid rgba(245,158,11,.25);border-radius:10px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:12px;}
+.calc-total-left .tl-lbl{font-size:11px;color:var(--slate);}
+.calc-total-left .tl-title{font-size:13px;font-weight:700;}
+.calc-total-right{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--amber);}
+.calc-note{margin-top:12px;padding:10px 12px;background:var(--bdim);border:1px solid rgba(59,130,246,.2);border-radius:8px;font-size:11px;color:var(--slate);line-height:1.5;}
+.calc-note strong{color:var(--blue);}
+
+/* SAVINGS TIP */
+.savings-tip{background:var(--gdim);border:1px solid rgba(0,229,180,.2);border-radius:10px;padding:12px 14px;margin-top:10px;font-size:11px;color:var(--slate);line-height:1.6;display:none;}
+.savings-tip strong{color:var(--accent);}
+.savings-tip.show{display:block;}
+
+/* CALENDAR */
+.callist{display:flex;flex-direction:column;gap:7px;padding:14px 16px;}
+.cal{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:9px;border:1px solid var(--border);background:var(--s2);transition:all .15s;}
+.cal:hover{border-color:var(--border2);}
+.cal.urg{border-color:rgba(239,68,68,.3);background:var(--rdim);}
+.cal.soon{border-color:rgba(245,158,11,.3);background:var(--ydim);}
+.cal.done{border-color:rgba(16,185,129,.3);background:var(--gdim);}
+.cal-dt{text-align:center;width:36px;flex-shrink:0;}
+.cal-day{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;line-height:1;}
+.cal.urg .cal-day{color:var(--red);}
+.cal.soon .cal-day{color:var(--amber);}
+.cal.done .cal-day{color:var(--green);}
+.cal-mon{font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--slate);}
+.cal-info{flex:1;}
+.cal-t{font-size:12px;font-weight:600;}
+.cal-d{font-size:10px;color:var(--slate);margin-top:1px;}
+.cal-pill{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;flex-shrink:0;}
+.cal.urg .cal-pill{background:rgba(239,68,68,.2);color:var(--red);}
+.cal.soon .cal-pill{background:rgba(245,158,11,.2);color:var(--amber);}
+.cal.done .cal-pill{background:rgba(16,185,129,.2);color:var(--green);}
+.cal .cal-pill{background:var(--s3);color:var(--slate);}
+
+/* QA */
+.qa{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:14px 18px;}
+.qa-btn{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:13px;cursor:pointer;text-align:center;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.qa-btn:hover{border-color:var(--accent);background:var(--adim);transform:translateY(-1px);}
+.qa-btn.pr{background:var(--accent);border-color:var(--accent);color:#000;}
+.qa-btn.pr:hover{background:#00b085;}
+.qa-ico{font-size:18px;margin-bottom:4px;}
+.qa-lbl{font-size:11px;font-weight:600;}
+
+/* PENDING STRIP */
+.pstrip{display:flex;align-items:center;gap:11px;padding:12px 20px;background:var(--bdim);border-top:1px solid rgba(59,130,246,.2);cursor:pointer;}
+.pstrip:hover{background:rgba(59,130,246,.16);}
+.pnum{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--blue);}
+
+/* DEDUCTION ITEMS */
+.dedlist{display:flex;flex-direction:column;gap:5px;padding:14px 18px;}
+.ded{display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:9px;border:1px solid var(--border);background:var(--s2);transition:all .15s;}
+.ded:hover{border-color:var(--border2);}
+.ded-ico{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.ded-info{flex:1;}
+.ded-name{font-size:12px;font-weight:600;}
+.ded-desc{font-size:10px;color:var(--slate);margin-top:1px;}
+.ded-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;flex-shrink:0;}
+.b100{background:var(--gdim);color:var(--green);}
+.b50{background:var(--ydim);color:var(--amber);}
+.bvar{background:var(--bdim);color:var(--blue);}
+.b0{background:var(--rdim);color:var(--red);}
+
+/* AUDIT RISK */
+.riskitem{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--border);}
+.riskitem:last-child{border-bottom:none;}
+.risk-ico{font-size:17px;flex-shrink:0;width:22px;text-align:center;}
+.risk-body{flex:1;}
+.risk-t{font-size:12px;font-weight:600;}
+.risk-d{font-size:10px;color:var(--slate);margin-top:1px;}
+.risk-lv{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;flex-shrink:0;}
+.rok{background:var(--gdim);color:var(--green);}
+.rwarn{background:var(--ydim);color:var(--amber);}
+
+/* SCHEDULE C */
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:13px;overflow:hidden;margin-bottom:14px;}
+.sc-h{background:linear-gradient(135deg,var(--s2),var(--s3));border-bottom:1px solid var(--border2);padding:16px 22px;display:flex;align-items:center;justify-content:space-between;}
+.sc-ht{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+.sc-lbl{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--slate);font-family:'DM Mono',monospace;margin-top:2px;}
+.sc-line{display:flex;align-items:center;border-bottom:1px solid rgba(255,255,255,.03);transition:background .15s;}
+.sc-line:last-child{border-bottom:none;}
+.sc-line:hover{background:rgba(255,255,255,.02);}
+.sc-line.kl{background:rgba(245,158,11,.04);}
+.sc-line.tl{background:rgba(0,229,180,.05);border-top:2px solid rgba(0,229,180,.2);}
+.sc-num{width:48px;padding:11px 14px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);border-right:1px solid var(--border);text-align:center;flex-shrink:0;}
+.sc-desc{flex:1;padding:11px 14px;font-size:11px;color:var(--slate);line-height:1.4;}
+.sc-desc strong{color:var(--text);font-size:12px;display:block;margin-bottom:1px;}
+.sc-src{padding:11px 10px;font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;border-left:1px solid var(--border);width:110px;flex-shrink:0;text-align:center;line-height:1.4;}
+.sc-stag{display:inline-block;background:var(--adim);color:var(--accent);padding:1px 7px;border-radius:4px;font-size:8px;font-weight:700;margin-bottom:2px;}
+.sc-stag.warn{background:var(--ydim);color:var(--amber);}
+.sc-val{width:120px;padding:11px 14px;text-align:right;flex-shrink:0;border-left:1px solid var(--border);}
+.sv{font-family:'DM Mono',monospace;font-size:12px;color:var(--text);}
+.sv.pos{color:var(--accent);}
+.sv.sub{color:var(--amber);font-weight:700;}
+.sv.tot{color:var(--accent);font-weight:700;font-size:14px;}
+.sv.zero{color:var(--muted);}
+.sv-s{font-size:9px;color:var(--muted);margin-top:2px;font-family:'DM Mono',monospace;}
+
+/* REPORT */
+.rline{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:9px;background:var(--s2);margin-bottom:7px;}
+.rline.rtot{background:var(--adim);border:1px solid rgba(0,229,180,.2);}
+.rline.rtax{background:var(--ydim);border:1px solid rgba(245,158,11,.2);}
+.rl{font-size:12px;color:var(--slate);}
+.rv{font-size:13px;font-weight:700;font-family:'Syne',sans-serif;}
+
+/* UPLOAD */
+.upzone{border:2px dashed var(--border2);border-radius:11px;padding:26px;text-align:center;cursor:pointer;transition:all .2s;margin:14px 20px;}
+.upzone:hover{border-color:var(--accent);background:var(--adim);}
+
+/* 2025 UPDATE BADGES */
+.update-badge{display:inline-block;background:rgba(0,229,180,.15);color:var(--accent);border:1px solid rgba(0,229,180,.3);font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:6px;vertical-align:middle;}
+.new-badge{background:rgba(245,158,11,.15);color:var(--amber);border-color:rgba(245,158,11,.3);}
+
+/* FLOW */
+.flow3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px;}
+.flowcard{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;position:relative;}
+.flow-step{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--s3);border:1px solid var(--border2);border-radius:20px;padding:1px 9px;font-size:9px;font-weight:700;color:var(--slate);text-transform:uppercase;white-space:nowrap;}
+.flow-ico{font-size:22px;margin:10px 0 6px;}
+.flow-lbl{font-size:11px;color:var(--slate);margin-bottom:5px;}
+.flow-val{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;letter-spacing:-1px;}
+.flow-form{font-size:9px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:3px;}
+
+/* IRS 2025 CHANGES TABLE */
+.changes-table{width:100%;border-collapse:collapse;}
+.changes-table th{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:700;padding:8px 14px;text-align:left;border-bottom:1px solid var(--border);}
+.changes-table td{font-size:12px;padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:top;}
+.changes-table tr:last-child td{border-bottom:none;}
+.changes-table tr:hover td{background:rgba(255,255,255,.02);}
+.td-name{font-weight:600;color:var(--text);}
+.td-old{color:var(--muted);font-family:'DM Mono',monospace;}
+.td-new{color:var(--accent);font-weight:700;font-family:'DM Mono',monospace;}
+.td-impact{color:var(--slate);font-size:11px;}
+
+
+/* ── REFINAMIENTO VISUAL ── */
+.sb-logo-mark{font-family:'Syne',sans-serif;font-size:21px;font-weight:800;letter-spacing:-0.5px;}
+.topbar{background:linear-gradient(to right,var(--surface),#0d1e35);border-bottom:1px solid rgba(0,200,150,0.12);}
+.sb{background:linear-gradient(180deg,#0d1a2d 0%,var(--surface) 100%);border-right:1px solid rgba(0,200,150,0.08);}
+.sb-btn.active{background:linear-gradient(135deg,rgba(0,200,150,0.15),rgba(0,200,150,0.05));color:var(--accent);border-left:2px solid var(--accent);padding-left:10px;}
+.stat{transition:all .2s;cursor:default;}
+.stat:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,0,0,0.2);}
+.stat.hl-g{background:linear-gradient(135deg,rgba(0,200,150,0.12),rgba(0,200,150,0.04));}
+.stat.hl-y{background:linear-gradient(135deg,rgba(245,158,11,0.12),rgba(245,158,11,0.04));}
+.auth-box{box-shadow:0 20px 60px rgba(0,0,0,0.5);}
+.auth-btn{background:linear-gradient(135deg,#00c896,#00a878);box-shadow:0 4px 15px rgba(0,200,150,0.3);}
+.auth-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,200,150,0.4);}
+.card{transition:border-color .2s;}
+.card:hover{border-color:rgba(0,200,150,0.2);}
+.lbtn.on{background:linear-gradient(135deg,#00c896,#00a878)!important;box-shadow:0 4px 15px rgba(0,200,150,0.3);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.fu{animation:fadeUp .35s ease both;}
+
+/* ── LANG TOGGLE ── */
+.lang-pill{display:flex;background:rgba(255,255,255,.06);border-radius:20px;padding:3px;gap:2px;}
+.lang-opt{padding:4px 11px;border-radius:14px;border:none;font-size:10px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--slate);background:none;transition:all .15s;}
+.lang-opt.active{background:var(--accent);color:#000;}
+.lang-bar{display:flex;align-items:center;gap:6px;padding:5px 8px;margin:4px 10px;background:var(--s2);border-radius:7px;}
+.lang-bar-lbl{font-size:9px;color:var(--muted);flex:1;text-transform:uppercase;letter-spacing:1px;}
+.lang-bar-pill{display:flex;background:var(--s3);border-radius:14px;padding:2px;}
+.lang-bar-opt{padding:3px 10px;border-radius:12px;border:none;font-size:9px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--slate);background:none;transition:all .15s;}
+.lang-bar-opt.active{background:var(--accent);color:#000;}
+
+/* ── AUTH ── */
+#auth-screen{display:none;position:fixed;inset:0;background:var(--bg);z-index:200;align-items:center;justify-content:center;padding:20px;}
+.auth-box{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:36px;max-width:440px;width:100%;}
+.auth-logo{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;margin-bottom:4px;}
+.auth-logo em{background:linear-gradient(135deg,#00c896,#00a878);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-style:normal;}
+.auth-sub{font-size:13px;color:var(--slate);margin-bottom:22px;}
+.auth-tabs{display:flex;gap:4px;background:var(--s2);border-radius:9px;padding:4px;margin-bottom:20px;}
+.auth-tab{flex:1;padding:8px;border-radius:7px;border:none;background:none;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--slate);cursor:pointer;transition:all .15s;}
+.auth-tab.active{background:var(--accent);color:#000;}
+.afield{margin-bottom:13px;}
+.afield label{font-size:10px;color:var(--slate);font-weight:700;text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px;}
+.afield input,.afield select{width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;transition:border-color .15s;}
+.afield input:focus,.afield select:focus{border-color:var(--accent);}
+.afield select option{background:var(--s2);}
+.auth-btn{width:100%;padding:12px;border-radius:9px;border:none;background:var(--accent);color:#000;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-top:6px;transition:all .15s;}
+.auth-btn:hover{background:#00b085;}
+.auth-btn.ghost{background:var(--s2);color:var(--text);border:1px solid var(--border2);margin-top:8px;}
+.auth-error{background:var(--rdim);border:1px solid rgba(239,68,68,.25);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--red);margin-bottom:12px;display:none;}
+.auth-success{background:var(--gdim);border:1px solid rgba(16,185,129,.25);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--green);margin-bottom:12px;display:none;}
+.forgot-link{font-size:11px;color:var(--accent);cursor:pointer;text-align:right;display:block;margin-top:5px;}
+.forgot-link:hover{text-decoration:underline;}
+.auth-alt{text-align:center;margin-top:13px;font-size:11px;color:var(--slate);}
+.auth-alt a{color:var(--accent);cursor:pointer;}
+
+/* ── SCAN ── */
+.scan-zone{border:2px dashed var(--border2);border-radius:14px;padding:40px 20px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:16px;}
+.scan-zone:hover,.scan-zone.drag{border-color:var(--accent);background:var(--adim);}
+.scan-result{background:var(--s2);border:1px solid var(--border2);border-radius:12px;padding:16px;margin-bottom:14px;display:none;}
+.scan-result.show{display:block;}
+.sr-field{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.sr-field:last-child{border-bottom:none;}
+.sr-lbl{color:var(--slate);}
+.sr-edit{background:var(--s3);border:1px solid var(--border2);border-radius:6px;padding:4px 8px;font-size:11px;color:var(--text);font-family:'DM Sans',sans-serif;width:155px;text-align:right;}
+.sr-edit:focus{outline:none;border-color:var(--accent);}
+.sr-edit option{background:var(--s2);}
+
+/* ── FORM ── */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.form-field{display:flex;flex-direction:column;gap:4px;}
+.form-field label{font-size:10px;color:var(--slate);font-weight:700;text-transform:uppercase;letter-spacing:.8px;}
+.form-field input,.form-field select{background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;transition:border-color .15s;}
+.form-field input:focus{border-color:var(--accent);}
+
+/* ── UTILS ── */
+.spinner{width:22px;height:22px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:36px;color:var(--slate);}
+.empty-state .emo{font-size:30px;margin-bottom:10px;}
+.btn-red{background:var(--rdim);color:var(--red);border:1px solid rgba(239,68,68,.25);}
+.tx{display:flex;align-items:center;gap:11px;padding:10px 18px;border-bottom:1px solid rgba(255,255,255,.03);transition:background .15s;cursor:pointer;}
+.tx:hover{background:rgba(255,255,255,.02);}
+.tx-ico{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.tx-body{flex:1;min-width:0;}
+.tx-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tx-meta{font-size:10px;color:var(--slate);margin-top:1px;}
+.tx-r{text-align:right;flex-shrink:0;}
+.tx-amt{font-size:13px;font-weight:700;font-family:'Syne',sans-serif;}
+.tag{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;margin-top:2px;}
+.tg{background:var(--gdim);color:var(--green);}
+.ty{background:var(--ydim);color:var(--amber);}
+.tr{background:var(--rdim);color:var(--red);}
+.ta{background:var(--adim);color:var(--accent);}
+
+</style>
+</head>
+<body>
+
+<!-- LEGAL WALL -->
+<div id="lwall">
+  <div class="lmodal">
+    <div class="lhdr">
+      <div class="lhdr-icon">⚖️</div>
+      <div style="text-align:center;margin-bottom:8px">
+        <img src="/static/logo.png" alt="FindXpert" style="height:56px;width:auto;object-fit:contain;filter:drop-shadow(0 0 12px rgba(0,200,150,0.4))">
+      </div>
+      <div class="lhdr-title">Important Legal Notice</div>
+      <div class="lhdr-sub">Please read and accept before accessing FindXpert</div>
+    </div>
+    <div class="lbody"><div style="display:flex;justify-content:flex-end;margin-bottom:14px">
+        <div class="lang-pill">
+          <button class="lang-opt active" onclick="setLang('en')">EN</button>
+          <button class="lang-opt" onclick="setLang('es')">ES</button>
+        </div>
+      </div>
+      
+      <div class="lsec">
+        <div class="lsec-t">What FindXpert Is</div>
+        <div class="lsec-p">FindXpert is a <strong>financial organization tool</strong>. It helps you track income, categorize expenses, and estimate tax obligations based on the data you enter. Updated with real IRS 2025 tax figures.</div>
+      </div>
+      <div class="lsec">
+        <div class="lsec-t">What FindXpert Is NOT</div>
+        <div class="lsec-p">FindXpert <strong>does not provide tax advice, legal advice, or accounting services</strong>. Nothing in this app constitutes a prepared tax return or can be submitted to the IRS. IRS Circular 230 applies.</div>
+      </div>
+      <div class="lchecks">
+        <label class="lcheck"><input type="checkbox" id="c1" onchange="var a=document.getElementById('c1').checked&&document.getElementById('c2').checked&&document.getElementById('c3').checked,b=document.getElementById('lbtn');b.style.background=a?'linear-gradient(135deg,#00c896,#00a878)':'';b.style.color=a?'#000':'';b.style.cursor=a?'pointer':'default';"><div class="lcheck-t">I understand FindXpert is <strong>not a tax preparer</strong> and this is not a tax return.</div></label>
+        <label class="lcheck"><input type="checkbox" id="c2" onchange="var a=document.getElementById('c1').checked&&document.getElementById('c2').checked&&document.getElementById('c3').checked,b=document.getElementById('lbtn');b.style.background=a?'linear-gradient(135deg,#00c896,#00a878)':'';b.style.color=a?'#000':'';b.style.cursor=a?'pointer':'default';"><div class="lcheck-t">I will consult a <strong>licensed CPA or Enrolled Agent</strong> before filing my taxes.</div></label>
+        <label class="lcheck"><input type="checkbox" id="c3" onchange="var a=document.getElementById('c1').checked&&document.getElementById('c2').checked&&document.getElementById('c3').checked,b=document.getElementById('lbtn');b.style.background=a?'linear-gradient(135deg,#00c896,#00a878)':'';b.style.color=a?'#000':'';b.style.cursor=a?'pointer':'default';"><div class="lcheck-t">I understand <strong>estimates may differ</strong> from my actual tax liability.</div></label>
+      </div>
+      <button id="lbtn" 
+  style="width:100%;padding:13px;border-radius:10px;border:none;font-size:13px;font-weight:700;font-family:DM Sans,sans-serif;transition:all .2s;background:#1d2f4d;color:#64748b;cursor:default"
+  onclick="
+    var ok = document.getElementById('c1').checked && document.getElementById('c2').checked && document.getElementById('c3').checked;
+    if(!ok){ alert('Marca las 3 casillas primero'); return; }
+    document.getElementById('lwall').style.display='none';
+    document.getElementById('auth-screen').style.display='flex';
+    try{ checkSession(); }catch(e){}
+  ">✓ I Understand — Enter FindXpert</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+
+<!-- ══ AUTH ══ -->
+<div id="auth-screen" style="display:flex">
+  <div class="auth-box">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+      <div class="auth-logo" style="line-height:1">
+        <img src="/static/logo.png" alt="FindXpert" style="height:52px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px rgba(0,200,150,0.35))">
+      </div>
+      <div class="lang-pill" style="margin-top:6px">
+        <button class="lang-opt active" onclick="setLang('en')">EN</button>
+        <button class="lang-opt" onclick="setLang('es')">ES</button>
+      </div>
+    </div>
+    <div class="auth-sub" id="tagline">Your tax assistant for self-employed in USA</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Sign In</button>
+      <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Create Account</button>
+    </div>
+    <div id="auth-error" class="auth-error"></div>
+    <div id="auth-success" class="auth-success"></div>
+
+    <!-- LOGIN -->
+    <div id="form-login">
+      <div class="afield"><label id="lbl-email1">Email</label><input type="email" id="l-email" placeholder="you@email.com"></div>
+      <div class="afield">
+        <label id="lbl-pass">Password / Contraseña</label>
+        <input type="password" id="l-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+        <span class="forgot-link" onclick="switchTab('forgot')" id="lnk-forgot">Forgot your password?</span>
+      </div>
+      <button class="auth-btn" onclick="doLogin()" id="btn-login-txt">Sign In →</button>
+      <div class="auth-alt"><span id="no-acct">Don't have an account?</span> <a onclick="switchTab('register')" id="lnk-create">Create one free</a></div>
+    </div>
+
+    <!-- FORGOT PASSWORD -->
+    <div id="form-forgot" style="display:none">
+      <div style="background:var(--bdim);border:1px solid rgba(59,130,246,.2);border-radius:9px;padding:12px 14px;font-size:12px;color:var(--slate);margin-bottom:16px" id="forgot-desc">
+        Enter your email and we'll send you a reset link. / Ingresa tu correo y te enviaremos un enlace.
+      </div>
+      <div class="afield"><label id="lbl-email-f">Email</label><input type="email" id="f-email" placeholder="you@email.com"></div>
+      <button class="auth-btn" onclick="doForgot()" id="btn-forgot-txt">Send Reset Link</button>
+      <button class="auth-btn ghost" onclick="switchTab('login')" id="btn-back-txt">← Back to Sign In</button>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="form-register" style="display:none">
+      <div class="afield"><label id="lbl-name">Full Name / Nombre</label><input type="text" id="r-name" placeholder="Juan García"></div>
+      <div class="afield"><label id="lbl-email2">Email</label><input type="email" id="r-email" placeholder="you@email.com"></div>
+      <div class="afield"><label id="lbl-pass2">Password (min 8)</label><input type="password" id="r-pass" placeholder="Min. 8 characters"></div>
+      <div class="form-row">
+        <div class="form-field">
+          <label id="lbl-state">State / Estado</label>
+          <select id="r-state">
+            <option value="Texas">Texas (No tax)</option>
+            <option value="Florida">Florida (No tax)</option>
+            <option value="Nevada">Nevada (No tax)</option>
+            <option value="California">California (13.3%)</option>
+            <option value="New York">New York (10.9%)</option>
+            <option value="Illinois">Illinois (4.95%)</option>
+            <option value="Arizona">Arizona (2.5%)</option>
+            <option value="Colorado">Colorado (4%)</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label id="lbl-status">Filing Status</label>
+          <select id="r-status">
+            <option value="single">Single / Soltero</option>
+            <option value="married">Married / Casado</option>
+            <option value="hoh">Head of Household</option>
+          </select>
+        </div>
+      </div>
+      <button class="auth-btn" onclick="doRegister()" id="btn-register-txt">Create Free Account →</button>
+      <div class="auth-alt"><span id="have-acct">Already have an account?</span> <a onclick="switchTab('login')" id="lnk-signin">Sign In</a></div>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+<div class="shell">
+
+<!-- SIDEBAR -->
+<aside class="sb">
+  <div class="sb-logo">
+    <div class="sb-logo-mark" style="line-height:1">
+      <img src="/static/logo.png" alt="FindXpert" style="height:38px;width:auto;object-fit:contain;filter:drop-shadow(0 0 8px rgba(0,200,150,0.3))">
+    </div>
+    <div class="sb-logo-tag">Tax Year 2025 ✓</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-grp">Main</div>
+    <button class="sb-btn active" onclick="go('dashboard',this)"><span class="sb-ico">📊</span>Dashboard</button>
+    <button class="sb-btn" onclick="go('income',this)"><span class="sb-ico">💰</span><span id="nav-income">My Income</span></button>
+    <button class="sb-btn" onclick="go('expenses',this)"><span class="sb-ico">🧾</span><span id="nav-expenses">My Expenses</span></button>
+    <button class="sb-btn" onclick="go('tickets',this)"><span class="sb-ico">📷</span>Scan Receipts<span class="sb-badge">3</span></button>
+    <div class="sb-grp">Tax Center</div>
+    <button class="sb-btn" onclick="go('tax',this)"><span class="sb-ico">🏛️</span><span id="nav-taxes">My Taxes</span></button>
+    <button class="sb-btn" onclick="go('calculator',this)"><span class="sb-ico">🧮</span>Tax Calculator</button>
+    <button class="sb-btn" onclick="go('deductions',this)"><span class="sb-ico">✂️</span>What's Deductible</button>
+    <button class="sb-btn" onclick="go('changes2025',this)"><span class="sb-ico">🆕</span>IRS 2025 Updates</button>
+    <button class="sb-btn" onclick="go('schedulec',this)"><span class="sb-ico">📋</span>Schedule C Preview</button>
+    <button class="sb-btn" onclick="go('reports',this)"><span class="sb-ico">📤</span>Send to CPA</button>
+  </nav>
+  <div class="sb-user">
+    <div class="sb-user-inner">
+      <div class="sb-avatar">MR</div>
+      <div><div class="sb-uname" id="sb-user-name">—</div><div class="sb-uplan" id="sb-user-plan">Free Plan</div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="ptitle">Dashboard</div>
+    <div class="topbar-r"><div class="lang-pill" style="margin-right:4px"><button class="lang-opt active" id="app-lang-en" onclick="setLang('en')">EN</button><button class="lang-opt" id="app-lang-es" onclick="setLang('es')">ES</button></div><button class="btn btn-ghost btn-sm" onclick="doLogout()" id="btn-logout" style="font-size:11px">Sign Out</button> 
+      <span class="chip chip-amber">⚡ Q2 2026 — 23 days</span>
+      <span class="chip chip-green">IRS 2025 Updated ✓</span>
+      <span class="chip chip-blue">TX — No State Tax</span>
+    </div>
+  </div>
+  <div class="lbar">⚖️ <strong>Legal:</strong> FindXpert organizes your finances. Not tax advice. Not a tax return. Consult a licensed CPA before filing. | IRS Circular 230 applies. | 2025 IRS figures: Rev. Proc. 2024-40 + OBBBA.</div>
+
+  <!-- ══ DASHBOARD ══ -->
+  <div id="p-dashboard" class="panel active">
+    <div class="alert al-y fu">
+      <div class="alert-ico">⚠️</div>
+      <div class="alert-body">
+        <div class="alert-t">Q2 Tax Payment Due — June 15, 2026 (23 days)</div>
+        <div class="alert-d">Loading your tax estimate... That's ~$67 less than last year thanks to the higher standard deduction.</div>
+      </div>
+      <button class="btn btn-accent btn-sm" onclick="go('tax',document.querySelectorAll('.sb-btn')[4])">Details</button>
+    </div>
+
+    <div class="stats stats-4 fu">
+      <div class="stat hl-g">
+        <div class="stat-h"><span class="stat-lbl">Monthly Income</span><span class="stat-ico">💰</span></div>
+        <div class="stat-val cg" id="dash-income">$0</div>
+        <div class="stat-sub" id="dash-income-sub">Total this year</div>
+      </div>
+      <div class="stat">
+        <div class="stat-h"><span class="stat-lbl">Deductible Expenses</span><span class="stat-ico">✂️</span></div>
+        <div class="stat-val" id="dash-expenses">$0</div>
+        <div class="stat-sub">Verified · IRS 2025</div>
+      </div>
+      <div class="stat">
+        <div class="stat-h"><span class="stat-lbl">Taxable Profit</span><span class="stat-ico">📈</span></div>
+        <div class="stat-val cg" id="dash-net">$0</div>
+        <div class="stat-sub">After all deductions</div>
+      </div>
+      <div class="stat hl-y">
+        <div class="stat-h"><span class="stat-lbl">Set Aside — IRS 2025</span><span class="stat-ico">🏛️</span></div>
+        <div class="stat-val cy" id="dash-setaside">$0</div>
+        <div class="stat-sub" id="dash-setaside-sub">Quarterly estimate</div>
+      </div>
+    </div>
+
+    <div class="g2">
+      <div class="col">
+        <div class="card">
+          <div class="card-h"><span class="card-title">Income vs Expenses — 2025</span></div>
+          <div class="card-b">
+            <div class="chart">
+              <div class="bg"><div class="bp"><div class="bar inc" style="height:52%"></div><div class="bar exp" style="height:30%"></div></div><div class="blbl">Jan</div></div>
+              <div class="bg"><div class="bp"><div class="bar inc" style="height:60%"></div><div class="bar exp" style="height:26%"></div></div><div class="blbl">Feb</div></div>
+              <div class="bg"><div class="bp"><div class="bar inc" style="height:68%"></div><div class="bar exp" style="height:33%"></div></div><div class="blbl">Mar</div></div>
+              <div class="bg"><div class="bp"><div class="bar inc" style="height:78%"></div><div class="bar exp" style="height:28%"></div></div><div class="blbl">Apr</div></div>
+              <div class="bg"><div class="bp"><div class="bar inc" style="height:100%"></div><div class="bar exp" style="height:38%"></div></div><div class="blbl" style="color:var(--accent);font-weight:700">May▾</div></div>
+              <div class="bg" style="opacity:.4"><div class="bp"><div class="bar pi" style="height:83%"></div><div class="bar pe" style="height:33%"></div></div><div class="blbl">Jun*</div></div>
+            </div>
+            <div class="legend">
+              <div class="leg"><div class="ldot" style="background:var(--accent)"></div>Income</div>
+              <div class="leg"><div class="ldot" style="background:rgba(239,68,68,.55)"></div>Expenses</div>
+              <div class="leg"><div class="ldot" style="border:2px dashed var(--slate);background:none;border-radius:3px"></div>Projected</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h"><span class="card-title">Recent Activity</span><span class="card-act" onclick="go('income',document.querySelectorAll('.sb-btn')[1])">View All →</span></div>
+          <div class="txlist">
+            <div class="tx"><div class="tx-ico" style="background:var(--gdim)">💵</div><div class="tx-body"><div class="tx-name">Johnson Residence — Electrical Work</div><div class="tx-meta">May 28 · Invoice #0041 · Paid ✅</div></div><div class="tx-r"><div class="tx-amt cg">+$3,200</div><span class="tag ta">Income</span></div></div>
+            <div class="tx"><div class="tx-ico" style="background:var(--gdim)">🛒</div><div class="tx-body"><div class="tx-name">Home Depot — Wire & Conduit</div><div class="tx-meta">May 27 · Receipt scanned ✓</div></div><div class="tx-r"><div class="tx-amt cr">−$487</div><span class="tag tg">100% Ded.</span></div></div>
+            <div class="tx"><div class="tx-ico" style="background:var(--adim)">💵</div><div class="tx-body"><div class="tx-name">Martinez Office — Panel Upgrade</div><div class="tx-meta">May 25 · Invoice #0040 · Paid ✅</div></div><div class="tx-r"><div class="tx-amt cg">+$2,800</div><span class="tag ta">Income</span></div></div>
+            <div class="tx"><div class="tx-ico" style="background:var(--ydim)">⛽</div><div class="tx-body"><div class="tx-name">Shell Gas — 142 miles @ $0.70/mi</div><div class="tx-meta">May 24 · 2025 rate · Mileage logged ✓</div></div><div class="tx-r"><div class="tx-amt cr">−$89</div><span class="tag tg">100% Ded.</span></div></div>
+            <div class="tx"><div class="tx-ico" style="background:var(--bdim)">📱</div><div class="tx-body"><div class="tx-name">AT&T — Cell Phone</div><div class="tx-meta">May 22 · 50% business use</div></div><div class="tx-r"><div class="tx-amt cr">−$95</div><span class="tag ty">50% Ded.</span></div></div>
+            <div class="tx"><div class="tx-ico" style="background:var(--rdim)">🍔</div><div class="tx-body"><div class="tx-name">McDonald's — Personal lunch</div><div class="tx-meta">May 21 · No business purpose → Rejected</div></div><div class="tx-r"><div class="tx-amt cr">−$14</div><span class="tag tr">$0</span></div></div>
+          </div>
+          <div class="pstrip" onclick="go('tickets',document.querySelectorAll('.sb-btn')[3])">
+            <div class="pnum">3</div>
+            <div><div style="font-size:12px;font-weight:600">Receipts waiting to scan</div><div style="font-size:10px;color:var(--slate)">AI reads them instantly</div></div>
+            <span style="color:var(--blue);font-size:16px;margin-left:auto">→</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <!-- TAX SUMMARY 2025 -->
+        <div class="card">
+          <div class="card-h">
+            <span class="card-title">🏛️ Tax Summary — IRS 2025</span>
+            <span class="card-act" onclick="go('calculator',document.querySelectorAll('.sb-btn')[5])">Full Calc →</span>
+          </div>
+          <div style="padding:18px 20px">
+            <div style="display:flex;align-items:center;gap:9px;padding:9px 13px;background:var(--s2);border-radius:9px;border:1px solid var(--border);margin-bottom:14px">
+              <span style="font-size:18px">🤠</span>
+              <span style="font-size:12px;font-weight:600;flex:1">Texas</span>
+              <span style="font-size:11px;color:var(--green);font-weight:600">$0 State Tax</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:var(--slate)">Gross Income</span><span style="font-weight:700;font-family:'Syne',sans-serif" id="tsum-income">$0</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:var(--slate)">Expenses deducted</span><span style="font-weight:700;color:var(--green)" id="tsum-expenses">−$0</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:var(--slate)">QBI 20% (2025)</span><span style="font-weight:700;color:var(--blue)">−$1,645</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:var(--slate)">Standard Deduction <span class="update-badge">2025: $15,750</span></span><span style="font-weight:700;color:var(--blue)">−$1,313</span></div>
+              <div style="height:1px;background:var(--border)"></div>
+              <div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:var(--slate)">SE Tax (15.3%×92.35%)</span><span style="font-weight:700;color:var(--amber)">$1,044</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:var(--slate)">Income Tax (2025 brackets)</span><span style="font-weight:700;color:var(--red)">$1,503</span></div>
+              <div style="height:1px;background:var(--border)"></div>
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div><div style="font-size:12px;font-weight:700">Q2 Total to Set Aside</div><div style="font-size:10px;color:var(--green);margin-top:2px">Effective rate: 20.7% — real IRS 2025</div></div>
+                <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--amber)" id="tsum-total">$0</div>
+              </div>
+            </div>
+            <div style="margin-top:12px;padding:10px 12px;background:var(--gdim);border:1px solid rgba(0,229,180,.2);border-radius:8px;font-size:11px;color:var(--slate)">
+              💡 The <strong style="color:var(--accent)">2025 standard deduction increased to $15,750</strong> — you save ~$67 more vs last year.
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h"><span class="card-title">📅 IRS Deadlines</span></div>
+          <div class="callist">
+            <div class="cal urg"><div class="cal-dt"><div class="cal-day">15</div><div class="cal-mon">Jun</div></div><div class="cal-info"><div class="cal-t">Q2 Tax Payment</div><div class="cal-d" id="cal-q2-amount">Form 1040-ES · $0</div></div><div class="cal-pill">23 days</div></div>
+            <div class="cal soon"><div class="cal-dt"><div class="cal-day">15</div><div class="cal-mon">Sep</div></div><div class="cal-info"><div class="cal-t">Q3 Tax Payment</div><div class="cal-d">Form 1040-ES · Est. $2,600</div></div><div class="cal-pill">126 days</div></div>
+            <div class="cal"><div class="cal-dt"><div class="cal-day">15</div><div class="cal-mon">Jan</div></div><div class="cal-info"><div class="cal-t">Q4 Tax Payment</div><div class="cal-d">Form 1040-ES · Est. $2,500</div></div><div class="cal-pill">248 days</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h"><span class="card-title">Quick Actions</span></div>
+          <div class="qa">
+            <div class="qa-btn pr" onclick="go('tickets',document.querySelectorAll('.sb-btn')[3])"><div class="qa-ico">📷</div><div class="qa-lbl">Scan Receipt</div></div>
+            <div class="qa-btn" onclick="go('calculator',document.querySelectorAll('.sb-btn')[5])"><div class="qa-ico">🧮</div><div class="qa-lbl">Tax Calculator</div></div>
+            <div class="qa-btn" onclick="go('changes2025',document.querySelectorAll('.sb-btn')[7])"><div class="qa-ico">🆕</div><div class="qa-lbl">2025 Changes</div></div>
+            <div class="qa-btn" onclick="go('reports',document.querySelectorAll('.sb-btn')[9])"><div class="qa-ico">📤</div><div class="qa-lbl">Send to CPA</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ INCOME ══ -->
+  <div id="p-income" class="panel">
+    <div class="stats stats-3">
+      <div class="stat hl-g"><div class="stat-h"><span class="stat-lbl">Total Invoiced</span><span class="stat-ico">💰</span></div><div class="stat-val cg" id="income-total">$0</div><div class="stat-sub" id="income-period">This year</div></div>
+      <div class="stat hl-b"><div class="stat-h"><span class="stat-lbl">Paid</span><span class="stat-ico">✅</span></div><div class="stat-val cb">$10,100</div><div class="stat-sub">4 invoices cleared</div></div>
+      <div class="stat hl-y"><div class="stat-h"><span class="stat-lbl">Pending</span><span class="stat-ico">⏳</span></div><div class="stat-val cy">$1,140</div><div class="stat-sub">1 invoice awaiting</div></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><span class="card-title">💰 All Invoices — May 2025</span><button class="btn btn-accent btn-sm">+ New Invoice</button></div>
+      <div class="txlist">
+        <div class="tx"><div class="tx-ico" style="background:var(--gdim)">💵</div><div class="tx-body"><div class="tx-name">Johnson Residence — Electrical Work</div><div class="tx-meta">May 28 · Invoice #0041 · Paid ✅</div></div><div class="tx-r"><div class="tx-amt cg">+$3,200</div><span class="tag tg">Paid</span></div></div>
+        <div class="tx"><div class="tx-ico" style="background:var(--gdim)">💵</div><div class="tx-body"><div class="tx-name">Martinez Office — Panel Upgrade</div><div class="tx-meta">May 25 · Invoice #0040 · Paid ✅</div></div><div class="tx-r"><div class="tx-amt cg">+$2,800</div><span class="tag tg">Paid</span></div></div>
+        <div class="tx"><div class="tx-ico" style="background:var(--gdim)">💵</div><div class="tx-body"><div class="tx-name">Williams Home — Full Rewiring</div><div class="tx-meta">May 18 · Invoice #0039 · Paid ✅</div></div><div class="tx-r"><div class="tx-amt cg">+$4,100</div><span class="tag tg">Paid</span></div></div>
+        <div class="tx" style="background:var(--ydim);border-radius:9px"><div class="tx-ico" style="background:var(--ydim)">⏳</div><div class="tx-body"><div class="tx-name">Thompson Commercial — EV Charger</div><div class="tx-meta">May 10 · Invoice #0038 · Pending ⚠️</div></div><div class="tx-r"><div class="tx-amt cy">$1,140</div><span class="tag ty">Pending</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ EXPENSES ══ -->
+  
+
+  <!-- ══ TICKETS ══ -->
+  <div id="p-tickets" class="panel">
+    <div class="alert al-b">
+      <div class="alert-ico">🤖</div>
+      <div class="alert-body">
+        <div class="alert-t">AI Receipt Reader — Active</div>
+        <div class="alert-d">Take a photo of any receipt. FindXpert reads vendor, amount, date, and classifies deductibility using real IRS 2025 rules automatically.</div>
+      </div>
+    </div>
+    <div class="g2e">
+      <div class="card">
+        <div class="card-h"><span class="card-title">📷 Upload Receipt or Invoice</span></div>
+        <div class="upzone">
+          <div style="font-size:30px;margin-bottom:7px">📄</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:3px">Drag & Drop or Tap to Upload</div>
+          <div style="font-size:11px;color:var(--slate)">JPG, PNG or PDF · <span style="color:var(--accent);font-weight:600">AI reads in seconds</span></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:0 18px 18px">
+          <button class="btn btn-accent">📷 Take Photo</button>
+          <button class="btn btn-ghost">📁 From Files</button>
+        </div>
+        <div style="margin:0 18px 18px;padding:11px 13px;background:var(--s2);border-radius:9px;font-size:11px;color:var(--slate);line-height:1.7">
+          <strong style="color:var(--text)">After upload, FindXpert will:</strong><br>
+          1. Read vendor, amount & date<br>
+          2. Identify expense category<br>
+          3. Apply IRS 2025 deductibility rules<br>
+          4. Save to your digital records<br>
+          5. Update your real-time tax calculation
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="card-title">✅ Recently Processed</span></div>
+        <div class="txlist">
+          <div class="tx"><div class="tx-ico" style="background:var(--gdim)">🛒</div><div class="tx-body"><div class="tx-name">Home Depot</div><div class="tx-meta">AI read · May 27 · Materials</div></div><div class="tx-r"><div class="tx-amt cr">−$487</div><span class="tag tg">100%</span></div></div>
+          <div class="tx"><div class="tx-ico" style="background:var(--ydim)">⛽</div><div class="tx-body"><div class="tx-name">Shell Station</div><div class="tx-meta">AI read · May 24 · Vehicle</div></div><div class="tx-r"><div class="tx-amt cr">−$89</div><span class="tag tg">100%</span></div></div>
+          <div class="tx"><div class="tx-ico" style="background:var(--bdim)">🔧</div><div class="tx-body"><div class="tx-name">Ace Hardware</div><div class="tx-meta">AI read · May 20 · Tools</div></div><div class="tx-r"><div class="tx-amt cr">−$234</div><span class="tag tg">100%</span></div></div>
+          <div class="tx"><div class="tx-ico" style="background:var(--rdim)">🍔</div><div class="tx-body"><div class="tx-name">McDonald's</div><div class="tx-meta">AI read · Rejected — personal meal</div></div><div class="tx-r"><div class="tx-amt cr">−$14</div><span class="tag tr">$0</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAX CENTER ══ -->
+  
+
+  <!-- ══ INTERACTIVE TAX CALCULATOR ══ -->
+  <div id="p-calculator" class="panel">
+    <div class="alert al-g">
+      <div class="alert-ico">🧮</div>
+      <div class="alert-body">
+        <div class="alert-t">Interactive Tax Calculator — IRS 2025 Data</div>
+        <div class="alert-d">Change any number and see your real tax update instantly. Based on Rev. Proc. 2024-40 + One Big Beautiful Bill Act (OBBBA).</div>
+      </div>
+    </div>
+    <div class="g2e">
+      <div class="card">
+        <div class="card-h"><span class="card-title">⚙️ Your Numbers</span><span style="font-size:10px;color:var(--muted)">Edit any field</span></div>
+        <div class="calc-wrap">
+          <div class="calc-row">
+            <span class="calc-label">Annual Gross Income</span>
+            <input class="calc-input" type="number" id="ci-income" value="96720" oninput="calcTax()">
+          </div>
+          <div class="calc-row">
+            <span class="calc-label">Deductible Expenses</span>
+            <input class="calc-input" type="number" id="ci-expenses" value="31468" oninput="calcTax()">
+          </div>
+          <div class="calc-row">
+            <span class="calc-label">Filing Status</span>
+            <select class="calc-select" id="ci-status" onchange="calcTax()">
+              <option value="single">Single</option>
+              <option value="married">Married Filing Jointly</option>
+              <option value="hoh">Head of Household</option>
+            </select>
+          </div>
+          <div class="calc-row">
+            <span class="calc-label">State</span>
+            <select class="calc-select" id="ci-state" onchange="calcTax()">
+              <option value="0">Texas / Florida / Nevada (0%)</option>
+              <option value="0.0925">California (~9.3%)</option>
+              <option value="0.065">New York (~6.5%)</option>
+              <option value="0.0495">Illinois (4.95%)</option>
+              <option value="0.05">Arizona (2.5%)</option>
+              <option value="0.04">Colorado (4%)</option>
+            </select>
+          </div>
+          <div class="calc-row">
+            <span class="calc-label">Children under 17 <span class="update-badge">2025: $2,200</span></span>
+            <input class="calc-input" type="number" id="ci-children" value="0" min="0" max="10" oninput="calcTax()">
+          </div>
+          <div class="calc-row">
+            <span class="calc-label">Age 65 or older? <span class="update-badge new-badge">NEW 2025</span></span>
+            <select class="calc-select" id="ci-senior" onchange="calcTax()">
+              <option value="0">No</option>
+              <option value="1">Yes — 1 person</option>
+              <option value="2">Yes — both spouses</option>
+            </select>
+          </div>
+          <div class="calc-row">
+            <span class="calc-label">SEP-IRA Contribution</span>
+            <input class="calc-input" type="number" id="ci-sepira" value="0" oninput="calcTax()">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><span class="card-title">📊 Your 2025 Tax Breakdown</span><span style="font-size:10px;color:var(--accent);font-weight:600">Live ●</span></div>
+        <div class="calc-wrap">
+          <div class="calc-result-row">
+            <div class="calc-result-label"><div class="calc-dot" style="background:var(--accent)"></div>Net Profit</div>
+            <div class="calc-result-val cg" id="cr-profit">$65,252</div>
+          </div>
+          <div class="calc-result-row">
+            <div class="calc-result-label"><div class="calc-dot" style="background:var(--amber)"></div>SE Tax (15.3%×92.35%)</div>
+            <div class="calc-result-val cy" id="cr-setax">$9,219</div>
+          </div>
+          <div class="calc-result-row">
+            <div class="calc-result-label"><div class="calc-dot" style="background:var(--blue)"></div>½ SE Tax Deduction</div>
+            <div class="calc-result-val cb" id="cr-seded">−$4,610</div>
+          </div>
+          <div class="calc-result-row">
+            <div class="calc-result-label"><div class="calc-dot" style="background:var(--blue)"></div>QBI Deduction (20%)</div>
+            <div class="calc-result-val cb" id="cr-qbi">−$13,050</div>
+          </div>
+          <div class="calc-result-row">
+            <div class="calc-result-label"><div class="calc-dot" style="background:var(--blue)"></div>Standard Deduction 2025</div>
+            <div class="calc-result-val cb" id="cr-std">−$15,750</div>
+          </div>
+          <div class="calc-result-row" id="cr-senior-row" style="display:none">
+            <div class="calc-result-label"><div class="calc-dot" style="background:var(--green)"></div>Senior Bonus Deduction</div>
+            <div class="calc-result-val cg" id="cr-senior">−$6,000</div>
+          </div>
+          <div class="calc-result-row" id="cr-sepira-row" style="display:none">
+            <div class="calc-result-label"><div class="calc-dot" style="background:var(--green)"></div>SEP-IRA Contribution</div>
+            <div class="calc-result-val cg" id="cr-sepira-val">−$0</div>
+          </div>
+          <div class="calc-divider"></div>
+          <div class="calc-result-row">
+            <div class="calc-result-label"><div class="calc-dot" style="background:var(--slate)"></div>Taxable Income</div>
+            <div class="calc-result-val" id="cr-taxable">$32,592</div>
+          </div>
+          <div class="calc-result-row">
+            <div class="calc-result-label"><div class="calc-dot" style="background:var(--red)"></div>Income Tax (brackets)</div>
+            <div class="calc-result-val cr" id="cr-incometax">$4,011</div>
+          </div>
+          <div class="calc-result-row" id="cr-state-row">
+            <div class="calc-result-label"><div class="calc-dot" style="background:var(--muted)"></div>State Tax</div>
+            <div class="calc-result-val" id="cr-statetax">$0</div>
+          </div>
+          <div class="calc-result-row" id="cr-ctc-row" style="display:none">
+            <div class="calc-result-label"><div class="calc-dot" style="background:var(--green)"></div>Child Tax Credit 2025</div>
+            <div class="calc-result-val cg" id="cr-ctc">−$0</div>
+          </div>
+          <div class="calc-divider"></div>
+          <div class="calc-total-box">
+            <div class="calc-total-left">
+              <div class="tl-lbl">Annual Tax Bill</div>
+              <div class="tl-title" id="cr-rate">Effective rate: 20.3%</div>
+            </div>
+            <div class="calc-total-right" id="cr-total">$13,230</div>
+          </div>
+          <div class="calc-note"><strong>FindXpert uses real 2025 IRS data:</strong> Rev. Proc. 2024-40 + OBBBA. Not tax advice — consult a CPA.</div>
+          <div class="savings-tip" id="sepira-tip">💡 <strong>SEP-IRA opportunity:</strong> You could contribute up to <span id="sepira-max">$16,313</span> (25% of net profit) and save <span id="sepira-savings">$0</span> in taxes.</div>
+          <div class="savings-tip" id="ctc-tip">🧒 <strong>Child Tax Credit applied:</strong> $2,200 per child in 2025 — this directly reduces your tax bill dollar for dollar.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ IRS 2025 CHANGES ══ -->
+  <div id="p-changes2025" class="panel">
+    <div class="alert al-g">
+      <div class="alert-ico">🆕</div>
+      <div class="alert-body">
+        <div class="alert-t">IRS 2025 Updates — Already Applied in FindXpert</div>
+        <div class="alert-d">These changes affect your Tax Year 2025 return (filed April 2026). Based on Rev. Proc. 2024-40 and the One Big Beautiful Bill Act (OBBBA) signed July 4, 2025.</div>
+      </div>
+    </div>
+
+    <!-- CHANGE 1 -->
+    <div class="card">
+      <div class="card-h">
+        <span class="card-title">1️⃣ Standard Deduction — Increased Significantly</span>
+        <span class="update-badge" style="font-size:11px;padding:3px 10px">OBBBA 2025</span>
+      </div>
+      <div class="card-b">
+        <table class="changes-table">
+          <tr><th>Filing Status</th><th>2024</th><th>2025 (New)</th><th>What it means for you</th></tr>
+          <tr>
+            <td class="td-name">Single / Self-Employed</td>
+            <td class="td-old">$14,600</td>
+            <td class="td-new">$15,750 ↑</td>
+            <td class="td-impact">+$1,150 more deducted → saves ~$138 in tax at 12% bracket</td>
+          </tr>
+          <tr>
+            <td class="td-name">Married Filing Jointly</td>
+            <td class="td-old">$29,200</td>
+            <td class="td-new">$31,500 ↑</td>
+            <td class="td-impact">+$2,300 more deducted → saves ~$276 in tax</td>
+          </tr>
+          <tr>
+            <td class="td-name">Head of Household</td>
+            <td class="td-old">$21,900</td>
+            <td class="td-new">$23,625 ↑</td>
+            <td class="td-impact">+$1,725 more deducted → saves ~$207 in tax</td>
+          </tr>
+        </table>
+        <div style="margin-top:12px;padding:10px 13px;background:var(--adim);border:1px solid rgba(0,229,180,.2);border-radius:9px;font-size:11px;color:var(--slate)">
+          ✅ <strong style="color:var(--accent)">Already updated in FindXpert.</strong> Your tax calculator uses $15,750 for single filers automatically.
+        </div>
+      </div>
+    </div>
+
+    <!-- CHANGE 2 -->
+    <div class="card">
+      <div class="card-h">
+        <span class="card-title">2️⃣ Federal Tax Brackets — Adjusted for Inflation (~2.8%)</span>
+        <span class="update-badge" style="font-size:11px;padding:3px 10px">Rev. Proc. 2024-40</span>
+      </div>
+      <div class="card-b">
+        <table class="changes-table">
+          <tr><th>Rate</th><th>2024 Threshold (Single)</th><th>2025 Threshold (Single)</th><th>Change</th></tr>
+          <tr><td class="td-name">10%</td><td class="td-old">$0 – $11,600</td><td class="td-new">$0 – $11,925</td><td class="td-impact">+$325</td></tr>
+          <tr><td class="td-name">12%</td><td class="td-old">$11,601 – $47,150</td><td class="td-new">$11,926 – $48,475</td><td class="td-impact">+$1,325</td></tr>
+          <tr><td class="td-name">22%</td><td class="td-old">$47,151 – $100,525</td><td class="td-new">$48,476 – $103,350</td><td class="td-impact">+$2,825</td></tr>
+          <tr><td class="td-name">24%</td><td class="td-old">$100,526 – $191,950</td><td class="td-new">$103,351 – $197,300</td><td class="td-impact">+$5,350</td></tr>
+          <tr><td class="td-name">37% (top)</td><td class="td-old">$609,350+</td><td class="td-new">$626,350+</td><td class="td-impact">+$17,000</td></tr>
+        </table>
+        <div style="margin-top:12px;padding:10px 13px;background:var(--adim);border:1px solid rgba(0,229,180,.2);border-radius:9px;font-size:11px;color:var(--slate)">
+          ✅ <strong style="color:var(--accent)">Brackets now permanent</strong> thanks to OBBBA — no more annual expiration risk. FindXpert uses 2025 thresholds in all calculations.
+        </div>
+      </div>
+    </div>
+
+    <!-- CHANGE 3 -->
+    <div class="card">
+      <div class="card-h">
+        <span class="card-title">3️⃣ Retirement Savings Limits — Increased</span>
+        <span class="update-badge" style="font-size:11px;padding:3px 10px">SECURE 2.0</span>
+      </div>
+      <div class="card-b">
+        <table class="changes-table">
+          <tr><th>Account Type</th><th>2024</th><th>2025</th><th>Impact for Contractors</th></tr>
+          <tr><td class="td-name">401(k) / 403(b)</td><td class="td-old">$23,000</td><td class="td-new">$23,500 ↑</td><td class="td-impact">+$500 more tax-deferred savings</td></tr>
+          <tr><td class="td-name">IRA (Traditional/Roth)</td><td class="td-old">$7,000</td><td class="td-new">$7,000</td><td class="td-impact">No change</td></tr>
+          <tr><td class="td-name">Catch-up 50+ (401k)</td><td class="td-old">$7,500</td><td class="td-new">$7,500</td><td class="td-impact">No change</td></tr>
+          <tr><td class="td-name">Catch-up 60-63 (NEW)</td><td class="td-old">$7,500</td><td class="td-new">$11,250 ↑</td><td class="td-impact">Extra $3,750 for ages 60-63</td></tr>
+          <tr><td class="td-name">SEP-IRA (Self-Employed)</td><td class="td-old">25% / $69,000</td><td class="td-new">25% / $70,000 ↑</td><td class="td-impact">⭐ The best option for contractors</td></tr>
+        </table>
+        <div style="margin-top:12px;padding:12px 14px;background:var(--bdim);border:1px solid rgba(59,130,246,.25);border-radius:9px;font-size:11px;color:var(--slate);line-height:1.7">
+          💡 <strong style="color:var(--blue)">SEP-IRA is the #1 tax strategy for self-employed contractors.</strong><br>
+          With $65,252 net profit → max contribution: $16,313 (25%)<br>
+          Tax savings: ~$3,380 (income tax + reduces SE Tax base)<br>
+          This is legal, IRS-approved, and reduces your tax bill significantly.
+        </div>
+      </div>
+    </div>
+
+    <!-- CHANGE 4 -->
+    <div class="card">
+      <div class="card-h">
+        <span class="card-title">4️⃣ Child Tax Credit — Increased to $2,200</span>
+        <span class="update-badge" style="font-size:11px;padding:3px 10px">OBBBA 2025</span>
+      </div>
+      <div class="card-b">
+        <table class="changes-table">
+          <tr><th>Detail</th><th>2024</th><th>2025 (New)</th><th>Notes</th></tr>
+          <tr><td class="td-name">Credit per child</td><td class="td-old">$2,000</td><td class="td-new">$2,200 ↑</td><td class="td-impact">Child must be under 17 at Dec 31, 2025</td></tr>
+          <tr><td class="td-name">Refundable portion (ACTC)</td><td class="td-old">$1,600</td><td class="td-new">$1,700 ↑</td><td class="td-impact">Even if you owe no tax, you can receive this</td></tr>
+          <tr><td class="td-name">Phase-out threshold (Single)</td><td class="td-old">$200,000</td><td class="td-new">$200,000</td><td class="td-impact">No change — most contractors qualify fully</td></tr>
+        </table>
+        <div style="margin-top:12px;padding:12px 14px;background:var(--gdim);border:1px solid rgba(16,185,129,.2);border-radius:9px;font-size:11px;color:var(--slate);line-height:1.7">
+          🧒 <strong style="color:var(--green)">This is a CREDIT — not a deduction.</strong> It reduces your tax dollar-for-dollar.<br>
+          Example: 2 kids × $2,200 = $4,400 off your tax bill directly.<br>
+          With $4,011 income tax → you owe $0 and get $389 refunded via ACTC.
+        </div>
+      </div>
+    </div>
+
+    <!-- CHANGE 5 -->
+    <div class="card">
+      <div class="card-h">
+        <span class="card-title">5️⃣ New OBBBA Deductions — 2025 through 2028</span>
+        <span class="update-badge new-badge" style="font-size:11px;padding:3px 10px">NEW — July 2025</span>
+      </div>
+      <div class="card-b">
+        <table class="changes-table">
+          <tr><th>New Deduction</th><th>Maximum</th><th>Phase-out</th><th>Who qualifies</th></tr>
+          <tr>
+            <td class="td-name">🏖️ No Tax on Tips</td>
+            <td class="td-new">$25,000/yr</td>
+            <td class="td-impact">Income &gt;$150K (single)</td>
+            <td class="td-impact">Self-employed who receive tips in eligible occupations</td>
+          </tr>
+          <tr>
+            <td class="td-name">⏰ No Tax on Overtime</td>
+            <td class="td-new">$12,500/yr</td>
+            <td class="td-impact">Income &gt;$150K (single)</td>
+            <td class="td-impact">Self-employed overtime pay above regular rate</td>
+          </tr>
+          <tr>
+            <td class="td-name">🚗 Auto Loan Interest</td>
+            <td class="td-new">$10,000/yr</td>
+            <td class="td-impact">Income &gt;$100K (single)</td>
+            <td class="td-impact">NEW personal vehicle only — not business vehicles</td>
+          </tr>
+          <tr>
+            <td class="td-name">👴 Senior Bonus +65</td>
+            <td class="td-new">$6,000/person</td>
+            <td class="td-impact">Income &gt;$75K (single)</td>
+            <td class="td-impact">Age 65+ — on top of standard deduction</td>
+          </tr>
+        </table>
+        <div style="margin-top:12px;padding:10px 13px;background:var(--ydim);border:1px solid rgba(245,158,11,.2);border-radius:9px;font-size:11px;color:var(--slate)">
+          ⚠️ <strong style="color:var(--amber)">These deductions are temporary</strong> — valid 2025 through 2028. Use them while they last. FindXpert asks if you qualify during setup.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DEDUCTIONS ══ -->
+  <div id="p-deductions" class="panel">
+    <div class="alert al-b">
+      <div class="alert-ico">ℹ️</div>
+      <div class="alert-body">
+        <div class="alert-t">IRS Rule: Every deduction must be "Ordinary and Necessary" for your trade</div>
+        <div class="alert-d">FindXpert applies these rules automatically. Mileage rate for 2025: $0.70/mile.</div>
+      </div>
+    </div>
+    <div class="g2e">
+      <div class="card">
+        <div class="card-h"><span class="card-title">✅ 100% Deductible</span><span style="font-size:11px;color:var(--green);font-weight:700">Full deduction</span></div>
+        <div class="dedlist">
+          <div class="ded"><div class="ded-ico" style="background:var(--gdim)">🔧</div><div class="ded-info"><div class="ded-name">Tools & Equipment</div><div class="ded-desc">Drills, saws, meters, safety gear used for work</div></div><div class="ded-badge b100">100%</div></div>
+          <div class="ded"><div class="ded-ico" style="background:var(--gdim)">🪵</div><div class="ded-info"><div class="ded-name">Materials & Supplies</div><div class="ded-desc">Wire, pipe, paint — anything used on a job</div></div><div class="ded-badge b100">100%</div></div>
+          <div class="ded"><div class="ded-ico" style="background:var(--gdim)">🛡️</div><div class="ded-info"><div class="ded-name">Business Insurance</div><div class="ded-desc">Liability, workers comp, professional coverage</div></div><div class="ded-badge b100">100%</div></div>
+          <div class="ded"><div class="ded-ico" style="background:var(--gdim)">📋</div><div class="ded-info"><div class="ded-name">Licenses & Permits</div><div class="ded-desc">Contractor license, certifications, permits</div></div><div class="ded-badge b100">100%</div></div>
+          <div class="ded"><div class="ded-ico" style="background:var(--gdim)">👷</div><div class="ded-info"><div class="ded-name">Subcontractors</div><div class="ded-desc">What you pay helpers. Issue 1099-NEC if $2,000+ in 2025</div></div><div class="ded-badge b100">100%</div></div>
+          <div class="ded"><div class="ded-ico" style="background:var(--gdim)">💻</div><div class="ded-info"><div class="ded-name">Business Software</div><div class="ded-desc">FindXpert ($79/mo), invoicing apps, work-only subs</div></div><div class="ded-badge b100">100%</div></div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card">
+          <div class="card-h"><span class="card-title">⚠️ Partially Deductible</span></div>
+          <div class="dedlist">
+            <div class="ded"><div class="ded-ico" style="background:var(--ydim)">📱</div><div class="ded-info"><div class="ded-name">Cell Phone</div><div class="ded-desc">Only % used for work. FindXpert defaults to 50%</div></div><div class="ded-badge b50">50%</div></div>
+            <div class="ded"><div class="ded-ico" style="background:var(--ydim)">🍽️</div><div class="ded-info"><div class="ded-name">Business Meals</div><div class="ded-desc">With client + business purpose. Save receipt + who attended</div></div><div class="ded-badge b50">50%</div></div>
+            <div class="ded"><div class="ded-ico" style="background:var(--bdim)">🚗</div><div class="ded-info"><div class="ded-name">Vehicle — 2025 Rate</div><div class="ded-desc">$0.70/mile business trips. Home↔work: NEVER deductible</div></div><div class="ded-badge bvar">$0.70/mi</div></div>
+            <div class="ded"><div class="ded-ico" style="background:var(--bdim)">🏠</div><div class="ded-info"><div class="ded-name">Home Office</div><div class="ded-desc">Exclusive business use only. Max $1,500/yr simplified</div></div><div class="ded-badge bvar">% sqft</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="card-title">❌ NOT Deductible — Ever</span></div>
+          <div class="dedlist">
+            <div class="ded"><div class="ded-ico" style="background:var(--rdim)">👕</div><div class="ded-info"><div class="ded-name">Regular Clothing</div><div class="ded-desc">Even if worn on the job. Only branded uniforms qualify</div></div><div class="ded-badge b0">$0</div></div>
+            <div class="ded"><div class="ded-ico" style="background:var(--rdim)">🎟️</div><div class="ded-info"><div class="ded-name">Entertainment</div><div class="ded-desc">Sports, concerts, golf — banned since 2018. No exceptions</div></div><div class="ded-badge b0">$0</div></div>
+            <div class="ded"><div class="ded-ico" style="background:var(--rdim)">🚗</div><div class="ded-info"><div class="ded-name">Home↔Work Commute</div><div class="ded-desc">Driving from home to your first job site. Never deductible</div></div><div class="ded-badge b0">$0</div></div>
+            <div class="ded"><div class="ded-ico" style="background:var(--rdim)">🍔</div><div class="ded-info"><div class="ded-name">Personal Meals</div><div class="ded-desc">Eating alone with no documented business purpose</div></div><div class="ded-badge b0">$0</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SCHEDULE C ══ -->
+  <div id="p-schedulec" class="panel">
+    <div class="alert al-y">
+      <div class="alert-ico">⚖️</div>
+      <div class="alert-body">
+        <div class="alert-t">Legal Notice — FindXpert is NOT a tax preparer</div>
+        <div class="alert-d">This Schedule C Preview organizes your data for reference only. Cannot be filed with the IRS. Consult a licensed CPA or Enrolled Agent. | IRS Circular 230 applies.</div>
+      </div>
+    </div>
+    <div class="flow3">
+      <div class="flowcard"><div class="flow-step">Step 1</div><div class="flow-ico">💰</div><div class="flow-lbl">Gross Income</div><div class="flow-val cg">$96,720</div><div class="flow-form">Schedule C · Line 1</div></div>
+      <div class="flowcard"><div class="flow-step">Step 2</div><div class="flow-ico">✂️</div><div class="flow-lbl">Total Expenses</div><div class="flow-val cr">−$31,468</div><div class="flow-form">Schedule C · Line 28</div></div>
+      <div class="flowcard"><div class="flow-step">Step 3</div><div class="flow-ico">📊</div><div class="flow-lbl">Net Profit → IRS</div><div class="flow-val cg">$65,252</div><div class="flow-form">Schedule C · Line 31 → Form 1040</div></div>
+    </div>
+    <div class="sc">
+      <div class="sc-h"><div><div class="sc-ht">💰 Part I — Income</div><div class="sc-lbl">Schedule C · Lines 1–5</div></div><div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--accent)">$96,720</div></div>
+      <div class="sc-line"><div class="sc-num">1</div><div class="sc-desc"><strong>Gross receipts or sales</strong>All invoices paid by clients during 2025</div><div class="sc-src"><div class="sc-stag">FindXpert</div><div>47 invoices</div></div><div class="sc-val"><div class="sv pos">$96,720</div></div></div>
+      <div class="sc-line"><div class="sc-num">2</div><div class="sc-desc"><strong>Returns and allowances</strong>Refunds given to clients</div><div class="sc-src"><div class="sc-stag">FindXpert</div></div><div class="sc-val"><div class="sv zero">$0</div></div></div>
+      <div class="sc-line tl"><div class="sc-num" style="color:var(--accent)">5</div><div class="sc-desc"><strong style="color:var(--accent)">Gross income</strong></div><div class="sc-src"><div class="sc-stag">→ Part II</div></div><div class="sc-val"><div class="sv tot">$96,720</div></div></div>
+    </div>
+    <div class="sc">
+      <div class="sc-h"><div><div class="sc-ht">✂️ Part II — Expenses</div><div class="sc-lbl">Schedule C · Lines 8–28</div></div><div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--red)">−$31,468</div></div>
+      <div class="sc-line"><div class="sc-num">8</div><div class="sc-desc"><strong>Advertising</strong>Business cards, Google Ads, website</div><div class="sc-src"><div class="sc-stag">FindXpert</div></div><div class="sc-val"><div class="sv">$840</div></div></div>
+      <div class="sc-line"><div class="sc-num">9</div><div class="sc-desc"><strong>Car & truck expenses</strong>1,842 miles × $0.70 (2025 IRS rate). See Part IV.</div><div class="sc-src"><div class="sc-stag">FindXpert</div><div>Mileage log</div></div><div class="sc-val"><div class="sv">$1,289</div><div class="sv-s">$0.70×1,842</div></div></div>
+      <div class="sc-line"><div class="sc-num">11</div><div class="sc-desc"><strong>Contract labor</strong>Payments to helpers. 1099-NEC required if $2,000+ (2025 threshold)</div><div class="sc-src"><div class="sc-stag">FindXpert</div></div><div class="sc-val"><div class="sv">$4,800</div></div></div>
+      <div class="sc-line"><div class="sc-num">15</div><div class="sc-desc"><strong>Insurance</strong>Business liability. NOT personal health insurance</div><div class="sc-src"><div class="sc-stag">FindXpert</div></div><div class="sc-val"><div class="sv">$2,400</div></div></div>
+      <div class="sc-line"><div class="sc-num">22</div><div class="sc-desc"><strong>Supplies</strong>Wire, conduit, pipe, fixtures — 87 receipts scanned</div><div class="sc-src"><div class="sc-stag">FindXpert</div><div>87 receipts</div></div><div class="sc-val"><div class="sv">$18,240</div></div></div>
+      <div class="sc-line"><div class="sc-num">24b</div><div class="sc-desc"><strong>Meals (50% applied)</strong>$680 total → 50% rule → $340</div><div class="sc-src"><div class="sc-stag">50% Rule</div></div><div class="sc-val"><div class="sv">$340</div></div></div>
+      <div class="sc-line"><div class="sc-num">27</div><div class="sc-desc"><strong>Other expenses</strong>Phone 50%, software, licenses, bank fees</div><div class="sc-src"><div class="sc-stag">FindXpert</div></div><div class="sc-val"><div class="sv">$2,229</div></div></div>
+      <div class="sc-line tl"><div class="sc-num" style="color:var(--accent)">28</div><div class="sc-desc"><strong style="color:var(--accent)">Total expenses</strong></div><div class="sc-src"><div class="sc-stag">→ Line 31</div></div><div class="sc-val"><div class="sv tot">$31,468</div></div></div>
+      <div class="sc-line"><div class="sc-num">30</div><div class="sc-desc"><strong>Home office ⚠️</strong>Not set up. Add workspace to claim up to $1,500</div><div class="sc-src"><div class="sc-stag warn">MISSING</div></div><div class="sc-val"><div class="sv zero">$0</div><div class="sv-s" style="color:var(--amber)">⚠️ Missing</div></div></div>
+      <div class="sc-line tl" style="border-top:2px solid rgba(0,229,180,.3)"><div class="sc-num" style="color:var(--accent);font-weight:900;font-size:13px">31</div><div class="sc-desc"><strong style="color:var(--accent);font-size:13px">NET PROFIT → Form 1040 + Schedule SE</strong></div><div class="sc-src"><div class="sc-stag">→ Form 1040</div></div><div class="sc-val"><div class="sv tot" style="font-size:16px">$65,252</div></div></div>
+    </div>
+  </div>
+
+  <!-- ══ REPORTS ══ -->
+  <div id="p-reports" class="panel">
+    <div class="alert al-b">
+      <div class="alert-ico">📤</div>
+      <div class="alert-body">
+        <div class="alert-t">May 2025 Report Ready — Organized for your accountant</div>
+        <div class="alert-d">All 2025 IRS figures applied. Your CPA just needs to review and file.</div>
+      </div>
+      <button class="btn btn-blue btn-sm">✉️ Send to CPA</button>
+    </div>
+    <div class="g2e">
+      <div class="card">
+        <div class="card-h"><span class="card-title">📊 Monthly Summary — May 2025</span><button class="btn btn-ghost btn-sm">📥 Download PDF</button></div>
+        <div class="card-b">
+          <div class="rline"><div class="rl">Gross Income</div><div class="rv cg" id="rep-income">$0</div></div>
+          <div class="rline"><div class="rl">100% Deductible Expenses</div><div class="rv cg">−$2,871</div></div>
+          <div class="rline"><div class="rl">50% Deductible (phone)</div><div class="rv cg">−$47</div></div>
+          <div class="rline"><div class="rl">Not Deductible (personal)</div><div class="rv cm">−$14 (no deduction)</div></div>
+          <div class="rline rtot"><div class="rl" style="font-weight:700;color:var(--text)">Net Taxable Profit</div><div class="rv cg" style="font-size:15px">$8,322</div></div>
+          <div class="rline rtax"><div class="rl" style="font-weight:700;color:var(--text)">Estimated Tax — 2025 IRS <span class="update-badge">Updated</span></div><div class="rv cy" style="font-size:15px" id="rep-tax">$0</div></div>
+          <div style="margin-top:14px;padding:11px 13px;background:var(--rdim);border:1px solid rgba(239,68,68,.2);border-radius:9px;font-size:11px;color:var(--slate)">
+            ⚖️ <strong style="color:var(--red)">Legal Reminder:</strong> This is not a prepared tax return. Consult a licensed CPA or Enrolled Agent before filing. | IRS Circular 230 applies.
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card">
+          <div class="card-h"><span class="card-title">🗂️ Ready for Your CPA</span></div>
+          <div class="card-b" style="display:flex;flex-direction:column;gap:9px">
+            <div style="background:var(--gdim);border:1px solid rgba(0,229,180,.2);border-radius:9px;padding:11px 13px"><div style="font-size:10px;color:var(--slate)">Schedule C Data</div><div style="font-size:12px;font-weight:700;color:var(--green);margin-top:2px">✅ All 2025 figures organized</div></div>
+            <div style="background:var(--gdim);border:1px solid rgba(0,229,180,.2);border-radius:9px;padding:11px 13px"><div style="font-size:10px;color:var(--slate)">Digital Receipts</div><div style="font-size:12px;font-weight:700;color:var(--green);margin-top:2px">✅ 47 receipts saved & categorized</div></div>
+            <div style="background:var(--gdim);border:1px solid rgba(0,229,180,.2);border-radius:9px;padding:11px 13px"><div style="font-size:10px;color:var(--slate)">Mileage Log (2025: $0.70/mi)</div><div style="font-size:12px;font-weight:700;color:var(--green);margin-top:2px">✅ 842 miles logged</div></div>
+            <div style="background:var(--ydim);border:1px solid rgba(245,158,11,.2);border-radius:9px;padding:11px 13px"><div style="font-size:10px;color:var(--amber)">Needs Attention</div><div style="font-size:12px;font-weight:700;margin-top:2px">⚠️ 3 receipts not yet scanned</div></div>
+            <button class="btn btn-accent" style="width:100%;padding:11px">✉️ Send Full Report to CPA</button>
+            <button class="btn btn-ghost" style="width:100%;padding:9px">📥 Download as PDF</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="card-title">📋 Legal Note</span></div>
+          <div class="card-b" style="font-size:11px;color:var(--slate);line-height:1.7">
+            <p style="margin-bottom:8px">FindXpert organizes your records. <strong style="color:var(--text)">This is not tax advice.</strong></p>
+            <p style="margin-bottom:8px">Keep records for <strong style="color:var(--text)">at least 3 years</strong> — 7 years for major deductions.</p>
+            <p>Free tax help: <strong style="color:var(--blue)">IRS VITA — 1-800-906-9887</strong></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ MY INCOME (real backend) ══ -->
+  <div id="p-income" class="panel">
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-h"><span class="card-title" id="lbl-add-income">➕ Add Income</span></div>
+      <div class="card-b">
+        <div class="form-row">
+          <div class="form-field"><label id="lbl-client">Client / Source</label><input type="text" id="i-source" placeholder="Johnson Residence"></div>
+          <div class="form-field"><label id="lbl-amt">Amount ($)</label><input type="number" id="i-amount" placeholder="3200" step="0.01"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-field"><label id="lbl-dt">Date</label><input type="date" id="i-date"></div>
+          <div class="form-field"><label id="lbl-inv">Invoice #</label><input type="text" id="i-invoice" placeholder="INV-0041"></div>
+        </div>
+        <button class="btn btn-accent" onclick="addIncome()" id="btn-add-income">Add Income</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><span class="card-title" id="lbl-my-income">My Income — 2025</span></div>
+      <div id="income-list"><div class="empty-state"><div class="emo">💰</div><p id="no-income-txt">No income recorded yet.</p></div></div>
+    </div>
+  </div>
+
+  <!-- ══ MY EXPENSES (real backend) ══ -->
+  <div id="p-expenses" class="panel">
+    <div class="card">
+      <div class="card-h">
+        <span class="card-title" id="lbl-my-expenses">My Deductible Expenses</span>
+        <button class="btn btn-accent btn-sm" onclick="go('tickets',document.querySelectorAll('.sb-btn')[3])">📷 <span id="lbl-scan-btn">Scan Receipt</span></button>
+      </div>
+      <div id="expenses-list"><div class="empty-state"><div class="emo">🧾</div><p id="no-expenses-txt">Scan receipts to record deductible expenses.</p></div></div>
+    </div>
+  </div>
+
+  <!-- ══ SCAN RECEIPTS (real AI) ══ -->
+  <div id="p-tickets" class="panel">
+    <div class="card">
+      <div class="card-h"><span class="card-title" id="lbl-scan-title">📷 Scan Receipt with AI</span></div>
+      <div class="card-b">
+        <div class="scan-zone" id="scan-zone"
+          onclick="document.getElementById('file-input').click()"
+          ondragover="event.preventDefault();this.classList.add('drag')"
+          ondragleave="this.classList.remove('drag')"
+          ondrop="handleDrop(event)">
+          <div id="scan-content">
+            <div style="font-size:38px;margin-bottom:10px">📄</div>
+            <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:5px" id="scan-upload-lbl">Upload your receipt</div>
+            <div style="font-size:11px;color:var(--slate)" id="scan-sub-lbl">Click or drag a photo · JPG, PNG, PDF</div>
+          </div>
+        </div>
+        <input type="file" id="file-input" accept="image/*,application/pdf" style="display:none" onchange="scanFile(this.files[0])">
+
+        <div class="scan-result" id="scan-result">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700">✅ <span id="ai-read-lbl">AI read the receipt</span></div>
+            <button class="btn btn-red btn-sm" onclick="clearScan()" id="btn-clear-lbl">Clear</button>
+          </div>
+          <div class="sr-field"><span class="sr-lbl" id="lbl-vendor">Business / Negocio</span><input class="sr-edit" id="sr-vendor" type="text" placeholder="Home Depot"></div>
+          <div class="sr-field"><span class="sr-lbl" id="lbl-amount-sr">Amount / Monto</span><input class="sr-edit" id="sr-amount" type="number" step="0.01" placeholder="0.00"></div>
+          <div class="sr-field"><span class="sr-lbl" id="lbl-date-sr">Date / Fecha</span><input class="sr-edit" id="sr-date" type="date"></div>
+          <div class="sr-field"><span class="sr-lbl" id="lbl-cat-sr">Category</span>
+            <select class="sr-edit" id="sr-category">
+              <option>Materials &amp; Supplies</option>
+              <option>Tools &amp; Equipment</option>
+              <option>Vehicle &amp; Gas</option>
+              <option>Phone &amp; Internet</option>
+              <option>Office Supplies</option>
+              <option>Meals — Business</option>
+              <option>Professional Services</option>
+              <option>Insurance</option>
+              <option>Advertising</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="sr-field"><span class="sr-lbl" id="lbl-ded-sr">% Deductible</span>
+            <select class="sr-edit" id="sr-deductible">
+              <option value="100" id="opt-100">100% — Fully deductible</option>
+              <option value="50" id="opt-50">50% — Mixed use (meals/phone)</option>
+              <option value="0" id="opt-0">0% — Not deductible</option>
+            </select>
+          </div>
+          <div class="sr-field"><span class="sr-lbl" id="lbl-notes-sr">Notes</span><input class="sr-edit" id="sr-notes" type="text" placeholder="Wiring for Johnson job"></div>
+          <div style="margin-top:14px;display:flex;gap:8px">
+            <button class="btn btn-accent" onclick="saveReceipt()" id="btn-save-receipt">✅ Save Receipt</button>
+          </div>
+        </div>
+
+        <!-- Quick actions -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px">
+          <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:13px;cursor:pointer;text-align:center;transition:all .2s" onclick="go('income',document.querySelectorAll('.sb-btn')[1])" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="font-size:18px;margin-bottom:4px">💰</div><div style="font-size:11px;font-weight:600" id="qa-income">Add Income</div>
+          </div>
+          <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:13px;cursor:pointer;text-align:center;transition:all .2s" onclick="go('calculator',document.querySelectorAll('.sb-btn')[5])" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="font-size:18px;margin-bottom:4px">🧮</div><div style="font-size:11px;font-weight:600" id="qa-calc">Tax Calculator</div>
+          </div>
+          <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:13px;cursor:pointer;text-align:center;transition:all .2s" onclick="go('deductions',document.querySelectorAll('.sb-btn')[6])" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="font-size:18px;margin-bottom:4px">✂️</div><div style="font-size:11px;font-weight:600" id="qa-ded">Deductions</div>
+          </div>
+          <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:13px;cursor:pointer;text-align:center;transition:all .2s" onclick="go('reports',document.querySelectorAll('.sb-btn')[9])" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="font-size:18px;margin-bottom:4px">📤</div><div style="font-size:11px;font-weight:600" id="qa-cpa">Send to CPA</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MY TAXES (real backend) ══ -->
+  <div id="p-tax" class="panel">
+    <div class="card">
+      <div class="card-h">
+        <span class="card-title">🏛️ <span id="lbl-tax-detail">Tax Estimate — IRS 2025</span></span>
+        <span class="card-act" onclick="go('calculator',document.querySelectorAll('.sb-btn')[5])" id="lnk-full-calc">Full Calculator →</span>
+      </div>
+      <div id="tax-detail" style="padding:18px 20px">
+        <div class="empty-state"><div class="emo">🏛️</div><p id="no-tax-txt">Add income and expenses to calculate your estimate.</p></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// FINDXPERT — JS LIMPIO v1.0
+// ════════════════════════════════════════════════════════
+
+// ── LANG ─────────────────────────────────────────────────
+var LANG = 'en';
+
+function setLang(lang) {
+  LANG = lang;
+  document.querySelectorAll('.lang-opt').forEach(function(b) {
+    b.classList.toggle('active', b.textContent.trim() === lang.toUpperCase());
+  });
+}
+
+// ── LEGAL WALL ───────────────────────────────────────────
+function chkLegal() {
+  var ok = document.getElementById('c1').checked &&
+           document.getElementById('c2').checked &&
+           document.getElementById('c3').checked;
+  var btn = document.getElementById('lbtn');
+  btn.style.background = ok ? 'linear-gradient(135deg,#00c896,#00a878)' : '';
+  btn.style.color      = ok ? '#000' : '';
+  btn.style.cursor     = ok ? 'pointer' : 'default';
+  btn.style.boxShadow  = ok ? '0 4px 15px rgba(0,200,150,0.4)' : '';
+}
+
+function acceptLegal() {
+  var ok = document.getElementById('c1').checked &&
+           document.getElementById('c2').checked &&
+           document.getElementById('c3').checked;
+  if (!ok) { alert('Marca las 3 casillas'); return; }
+  document.getElementById('lwall').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+  checkSession();
+}
+
+// ── AUTH ─────────────────────────────────────────────────
+function showErr(msg) {
+  var el = document.getElementById('auth-error');
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+function clearErr() {
+  var el = document.getElementById('auth-error');
+  if (el) el.style.display = 'none';
+}
+
+function switchTab(tab) {
+  ['login','register','forgot'].forEach(function(t) {
+    var f = document.getElementById('form-' + t);
+    if (f) f.style.display = t === tab ? 'block' : 'none';
+  });
+  clearErr();
+}
+
+async function doLogin() {
+  clearErr();
+  var email = document.getElementById('l-email').value.trim();
+  var pass  = document.getElementById('l-pass').value;
+  if (!email || !pass) { showErr('Ingresa email y contraseña'); return; }
+  try {
+    var r = await fetch('/api/login', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: pass })
+    });
+    var d = await r.json();
+    if (!r.ok) { showErr(d.error || 'Error al iniciar sesión'); return; }
+    showApp(d.user);
+  } catch(e) {
+    showErr('No se puede conectar al servidor. ¿Está corriendo INICIAR_FINDXPERT.bat?');
+  }
+}
+
+async function doRegister() {
+  clearErr();
+  var name   = document.getElementById('r-name').value.trim();
+  var email  = document.getElementById('r-email').value.trim();
+  var pass   = document.getElementById('r-pass').value;
+  var state  = document.getElementById('r-state').value;
+  var status = document.getElementById('r-status').value;
+  if (!name || !email || !pass) { showErr('Completa todos los campos'); return; }
+  if (pass.length < 8) { showErr('Contraseña mínimo 8 caracteres'); return; }
+  try {
+    var r = await fetch('/api/register', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name, email: email, password: pass,
+                             state: state, filing_status: status })
+    });
+    var d = await r.json();
+    if (!r.ok) { showErr(d.error || 'Error al crear cuenta'); return; }
+    showApp(d.user);
+  } catch(e) {
+    showErr('No se puede conectar al servidor.');
+  }
+}
+
+async function doForgot() {
+  clearErr();
+  var email = document.getElementById('f-email').value.trim();
+  if (!email) { showErr('Ingresa tu email'); return; }
+  document.getElementById('auth-success').textContent =
+    'Si el email existe, recibirás instrucciones en minutos.';
+  document.getElementById('auth-success').style.display = 'block';
+}
+
+async function doLogout() {
+  await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+}
+
+async function checkSession() {
+  try {
+    var r = await fetch('/api/me', { credentials: 'include' });
+    if (r.ok) {
+      var d = await r.json();
+      showApp(d);
+    }
+  } catch(e) { /* sin sesión activa — OK */ }
+}
+
+function showApp(user) {
+  // Ocultar auth, mostrar app
+  document.getElementById('auth-screen').setAttribute('style', 'display:none!important');
+  document.getElementById('app').setAttribute('style', 'display:block!important');
+  // Info del usuario
+  var name = user.name || user.email || 'User';
+  var sn = document.getElementById('sb-user-name');
+  var sp = document.getElementById('sb-user-plan');
+  var sa = document.querySelector('.sb-avatar');
+  if (sn) sn.textContent = name;
+  if (sp) sp.textContent = 'Free Plan';
+  if (sa) sa.textContent = name[0].toUpperCase();
+  loadDashboardData();
+}
+
+// ── NAVEGACIÓN ───────────────────────────────────────────
+var NAV_TITLES = {
+  dashboard:'Dashboard', income:'My Income', expenses:'My Expenses',
+  tickets:'Scan Receipts', tax:'My Taxes', calculator:'Tax Calculator',
+  deductions:"What's Deductible", changes2025:'IRS 2025 Updates',
+  schedulec:'Schedule C Preview', reports:'Send to CPA'
+};
+
+function go(id, btn) {
+  document.querySelectorAll('.panel').forEach(function(p) {
+    p.classList.remove('active');
+  });
+  var panel = document.getElementById('p-' + id);
+  if (panel) panel.classList.add('active');
+  document.querySelectorAll('.sb-btn').forEach(function(b) {
+    b.classList.remove('active');
+  });
+  if (btn) btn.classList.add('active');
+  var t = NAV_TITLES[id] || id;
+  document.getElementById('ptitle').textContent = t;
+  window.scrollTo(0, 0);
+  if (id === 'income')    loadIncomes();
+  if (id === 'expenses')  loadExpenses();
+  if (id === 'tax')       loadTaxDetail();
+  if (id === 'dashboard') loadDashboardData();
+}
+
+// ── DASHBOARD ────────────────────────────────────────────
+async function loadDashboardData() {
+  try {
+    var r = await fetch('/api/dashboard', { credentials: 'include' });
+    if (!r.ok) return;
+    var d = await r.json();
+    var s = d.summary; var tx = d.taxes;
+    var set = function(id, v) { var e = document.getElementById(id); if(e) e.textContent = v; };
+    set('dash-income',   fmtM(s.total_income));
+    set('dash-expenses', fmtM(s.total_expenses));
+    set('dash-net',      fmtM(tx.net_profit));
+    set('dash-setaside', fmtM(tx.set_aside));
+    set('tsum-income',   fmtM(s.total_income));
+    set('tsum-expenses', '−' + fmtM(s.total_expenses));
+    set('tsum-total',    fmtM(tx.total_tax));
+    set('income-total',  fmtM(s.total_income));
+    set('rep-income',    fmtM(s.total_income));
+    set('rep-tax',       fmtM(tx.total_tax));
+  } catch(e) { console.error('Dashboard:', e); }
+}
+
+// ── INCOME ───────────────────────────────────────────────
+async function loadIncomes() {
+  var r = await fetch('/api/incomes', { credentials: 'include' });
+  var items = await r.json();
+  var el = document.getElementById('income-list');
+  if (!el) return;
+  if (!items.length) {
+    el.innerHTML = '<div class="empty-state"><div class="emo">💰</div><p>Sin ingresos registrados.</p></div>';
+    return;
+  }
+  el.innerHTML = items.map(function(i) {
+    return '<div class="tx"><div class="tx-ico" style="background:var(--gdim)">💵</div>' +
+      '<div class="tx-body"><div class="tx-name">' + i.source + '</div>' +
+      '<div class="tx-meta">' + (i.invoice_num||'') + ' · ' + i.date + '</div></div>' +
+      '<div class="tx-r"><div class="tx-amt cg">+' + fmtM(i.amount) + '</div>' +
+      '<span class="tag tr" style="cursor:pointer" onclick="delIncome(' + i.id + ')">✕</span></div></div>';
+  }).join('');
+}
+
+async function addIncome() {
+  var data = {
+    source:      document.getElementById('i-source').value.trim(),
+    amount:      parseFloat(document.getElementById('i-amount').value) || 0,
+    date:        document.getElementById('i-date').value,
+    invoice_num: document.getElementById('i-invoice').value.trim()
+  };
+  if (!data.source || !data.amount) { alert('Completa los campos'); return; }
+  await fetch('/api/incomes', {
+    method: 'POST', credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  document.getElementById('i-source').value = '';
+  document.getElementById('i-amount').value = '';
+  document.getElementById('i-invoice').value = '';
+  loadIncomes(); loadDashboardData();
+}
+
+async function delIncome(id) {
+  if (!confirm('¿Eliminar?')) return;
+  await fetch('/api/incomes/' + id, { method: 'DELETE', credentials: 'include' });
+  loadIncomes(); loadDashboardData();
+}
+
+// ── EXPENSES ─────────────────────────────────────────────
+async function loadExpenses() {
+  var r = await fetch('/api/receipts', { credentials: 'include' });
+  var items = await r.json();
+  var el = document.getElementById('expenses-list');
+  if (!el) return;
+  if (!items.length) {
+    el.innerHTML = '<div class="empty-state"><div class="emo">🧾</div><p>Sin gastos registrados.</p></div>';
+    return;
+  }
+  el.innerHTML = items.map(function(rx) {
+    var ded = rx.deductible_pct === 100 ? '<span class="tag tg">100%</span>' :
+              rx.deductible_pct === 50  ? '<span class="tag ty">50%</span>'  :
+                                          '<span class="tag tr">$0</span>';
+    return '<div class="tx"><div class="tx-ico" style="background:var(--rdim)">🧾</div>' +
+      '<div class="tx-body"><div class="tx-name">' + (rx.vendor||'Receipt') + '</div>' +
+      '<div class="tx-meta">' + rx.category + ' · ' + rx.date + '</div></div>' +
+      '<div class="tx-r"><div class="tx-amt cr">−' + fmtM(rx.amount) + '</div>' + ded + '</div></div>';
+  }).join('');
+}
+
+// ── SCAN ─────────────────────────────────────────────────
+var currentReceiptId = null;
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('scan-zone').classList.remove('drag');
+  var f = e.dataTransfer.files[0];
+  if (f) scanFile(f);
+}
+
+async function scanFile(file) {
+  if (!file) return;
+  var zone = document.getElementById('scan-content');
+  zone.innerHTML = '<div class="spinner"></div><div style="margin-top:10px;font-size:12px;color:var(--slate)">Leyendo recibo con IA...</div>';
+  var fd = new FormData(); fd.append('file', file);
+  try {
+    var r = await fetch('/api/receipts/scan', { method: 'POST', credentials: 'include', body: fd });
+    var d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Error');
+    currentReceiptId = d.receipt.id;
+    document.getElementById('sr-vendor').value   = d.receipt.vendor || '';
+    document.getElementById('sr-amount').value   = d.receipt.amount || 0;
+    document.getElementById('sr-date').value     = d.receipt.date   || '';
+    document.getElementById('sr-notes').value    = d.receipt.notes  || '';
+    var cat = document.getElementById('sr-category');
+    if (cat) cat.value = d.receipt.category || 'Other';
+    var ded = document.getElementById('sr-deductible');
+    if (ded) ded.value = d.receipt.deductible_pct || 100;
+    document.getElementById('scan-result').classList.add('show');
+    zone.innerHTML = '<div style="font-size:38px">✅</div><div style="font-size:14px;font-weight:700;margin-top:8px">¡Recibo leído!</div>';
+  } catch(e) {
+    zone.innerHTML = '<div style="font-size:38px">❌</div><div style="font-size:12px;margin-top:8px;color:var(--slate)">Error. Intenta con imagen más clara.</div>';
+  }
+}
+
+async function saveReceipt() {
+  if (!currentReceiptId) return;
+  var data = {
+    vendor:         document.getElementById('sr-vendor').value,
+    amount:         parseFloat(document.getElementById('sr-amount').value) || 0,
+    date:           document.getElementById('sr-date').value,
+    category:       document.getElementById('sr-category').value,
+    deductible_pct: parseInt(document.getElementById('sr-deductible').value) || 100,
+    notes:          document.getElementById('sr-notes').value
+  };
+  await fetch('/api/receipts/' + currentReceiptId, {
+    method: 'PUT', credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  clearScan(); loadDashboardData();
+  alert('✅ Recibo guardado');
+}
+
+function clearScan() {
+  currentReceiptId = null;
+  var el = document.getElementById('scan-result');
+  if (el) el.classList.remove('show');
+  var zone = document.getElementById('scan-content');
+  if (zone) zone.innerHTML = '<div style="font-size:38px;margin-bottom:10px">📄</div><div style="font-weight:700;margin-bottom:5px">Sube tu recibo</div><div style="font-size:11px;color:var(--slate)">Click o arrastra · JPG, PNG, PDF</div>';
+  var fi = document.getElementById('file-input');
+  if (fi) fi.value = '';
+}
+
+// ── TAX DETAIL ───────────────────────────────────────────
+async function loadTaxDetail() {
+  try {
+    var r = await fetch('/api/dashboard', { credentials: 'include' });
+    var d = await r.json();
+    var tx = d.taxes;
+    var el = document.getElementById('tax-detail');
+    if (!el) return;
+    if (!tx || tx.net_profit === 0) {
+      el.innerHTML = '<div class="empty-state"><div class="emo">🏛️</div><p>Agrega ingresos para calcular.</p></div>';
+      return;
+    }
+    el.innerHTML =
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">' +
+        '<div class="stat hl-g"><div class="stat-h"><span class="stat-lbl">Ganancia Neta</span></div><div class="stat-val cg">' + fmtM(tx.net_profit) + '</div></div>' +
+        '<div class="stat hl-y"><div class="stat-h"><span class="stat-lbl">Total Impuestos</span></div><div class="stat-val cy">' + fmtM(tx.total_tax) + '</div></div>' +
+      '</div>' +
+      '<div style="background:var(--s2);border-radius:11px;padding:16px;margin-bottom:14px">' +
+        '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px"><span style="color:var(--slate)">SE Tax (15.3%)</span><span class="cy" style="font-weight:700">' + fmtM(tx.se_tax) + '</span></div>' +
+        '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px"><span style="color:var(--slate)">QBI Deduction (20%)</span><span class="cg" style="font-weight:700">−' + fmtM(tx.qbi_deduction) + '</span></div>' +
+        '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px"><span style="color:var(--slate)">Deducción Estándar 2025</span><span class="cg" style="font-weight:700">−' + fmtM(tx.standard_deduction) + '</span></div>' +
+        '<div style="display:flex;justify-content:space-between;padding:8px 0;font-size:12px"><span style="color:var(--slate)">Income Tax</span><span class="cr" style="font-weight:700">' + fmtM(tx.income_tax) + '</span></div>' +
+      '</div>' +
+      '<div style="background:var(--ydim);border:1px solid rgba(245,158,11,.25);border-radius:11px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center">' +
+        '<div><div style="font-size:12px;font-weight:700">Total · Tasa efectiva: ' + tx.effective_rate + '%</div><div style="font-size:10px;color:var(--green)">Apartar por trimestre: ' + fmtM(tx.set_aside) + '</div></div>' +
+        '<div style="font-family:Syne,sans-serif;font-size:26px;font-weight:800;color:var(--amber)">' + fmtM(tx.total_tax) + '</div>' +
+      '</div>';
+  } catch(e) { console.error(e); }
+}
+
+// ── TAX CALCULATOR ───────────────────────────────────────
+var BRACKETS = {
+  single:  [[11925,.10],[48475,.12],[103350,.22],[197300,.24],[250525,.32],[626350,.35],[Infinity,.37]],
+  married: [[23850,.10],[96950,.12],[206700,.22],[394600,.24],[501050,.32],[751600,.35],[Infinity,.37]],
+  hoh:     [[17000,.10],[64850,.12],[103350,.22],[197300,.24],[250500,.32],[626350,.35],[Infinity,.37]]
+};
+var STD = {single:15750, married:31500, hoh:23625};
+
+function calcTax() {
+  var inc  = parseFloat(document.getElementById('ci-income').value)   || 0;
+  var exp  = parseFloat(document.getElementById('ci-expenses').value) || 0;
+  var st   = document.getElementById('ci-status').value;
+  var stR  = parseFloat(document.getElementById('ci-state').value)    || 0;
+  var ch   = parseInt(document.getElementById('ci-children').value)   || 0;
+  var sep  = parseFloat(document.getElementById('ci-sepira').value)   || 0;
+  var sen  = parseInt(document.getElementById('ci-senior').value)     || 0;
+
+  var net  = Math.max(0, inc - exp - sep);
+  var seT  = net * 0.9235 * 0.153;
+  var seD  = seT * 0.5;
+  var qbi  = net * 0.20;
+  var std  = STD[st] || 15750;
+  var senD = sen * 6000;
+  var tax  = Math.max(0, net - seD - qbi - std - senD);
+
+  var incT = 0, prev = 0, rem = tax;
+  (BRACKETS[st]||BRACKETS.single).forEach(function(b){
+    if(rem<=0)return; var s=Math.min(rem,b[0]-prev); incT+=s*b[1]; rem-=s; prev=b[0];
+  });
+
+  var stT  = tax * stR;
+  var ctc  = Math.min(ch * 2200, Math.max(0, incT));
+  var tot  = Math.max(0, seT + incT + stT - ctc);
+  var eff  = inc > 0 ? (tot/inc*100).toFixed(1) : 0;
+
+  var set = function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
+  set('cr-profit',    '$'+Math.round(net).toLocaleString());
+  set('cr-setax',     '$'+Math.round(seT).toLocaleString());
+  set('cr-seded',     '−$'+Math.round(seD).toLocaleString());
+  set('cr-qbi',       '−$'+Math.round(qbi).toLocaleString());
+  set('cr-std',       '−$'+Math.round(std).toLocaleString());
+  set('cr-taxable',   '$'+Math.round(tax).toLocaleString());
+  set('cr-incometax', '$'+Math.round(incT).toLocaleString());
+  set('cr-statetax',  '$'+Math.round(stT).toLocaleString());
+  set('cr-total',     '$'+Math.round(tot).toLocaleString());
+  set('cr-rate',      'Effective rate: '+eff+'%');
+  if(ch>0){var r=document.getElementById('cr-ctc-row');if(r)r.style.display='flex';set('cr-ctc','−$'+Math.round(ctc).toLocaleString());}
+  if(sen>0){var r=document.getElementById('cr-senior-row');if(r)r.style.display='flex';set('cr-senior','−$'+Math.round(senD).toLocaleString());}
+  if(sep>0){var r=document.getElementById('cr-sepira-row');if(r)r.style.display='flex';set('cr-sepira-val','−$'+Math.round(sep).toLocaleString());}
+}
+
+// ── UTILS ────────────────────────────────────────────────
+function fmtM(n) { return '$' + Math.round(n||0).toLocaleString('en-US'); }
+function fmt(n)  { return '$' + Math.round(n||0).toLocaleString(); }
+
+// ── INIT ─────────────────────────────────────────────────
+(function(){
+  calcTax();
+  // Si ya hay sesión activa al cargar, mostrar app directo
+  checkSession();
+})();
+</script>
+</body>
+</html>
